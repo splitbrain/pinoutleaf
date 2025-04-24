@@ -61,30 +61,47 @@ export class PinLabel extends Group {
 
         let x = 0;
         let y = 0;
+        let transform = ''; // Initialize transform string
 
         switch (alignment) {
             case 'leftof':
                 x = refBBox.x - myBBox.width - padding;
                 y = refBBox.y + (refBBox.height / 2) - (myBBox.height / 2);
+                transform = `translate(${x}, ${y})`;
                 break;
             case 'rightof':
                 x = refBBox.x + refBBox.width + padding;
                 y = refBBox.y + (refBBox.height / 2) - (myBBox.height / 2);
+                transform = `translate(${x}, ${y})`;
                 break;
             case 'above':
-                x = refBBox.x + (refBBox.width / 2) - (myBBox.width / 2);
-                y = refBBox.y - myBBox.height - padding;
+                // Calculate position considering rotated dimensions
+                x = refBBox.x + (refBBox.width / 2) - (myBBox.height / 2); // Use height for centering
+                y = refBBox.y - myBBox.width - padding; // Use width for vertical positioning
+
+                // Calculate rotation center (relative to label's origin 0,0)
+                const cxAbove = myBBox.width / 2;
+                const cyAbove = myBBox.height / 2;
+
+                transform = `translate(${x}, ${y}) rotate(-90 ${cxAbove} ${cyAbove})`; // Rotate -90 degrees
                 break;
             case 'under':
-                x = refBBox.x + (refBBox.width / 2) - (myBBox.width / 2);
+                 // Calculate position considering rotated dimensions
+                x = refBBox.x + (refBBox.width / 2) - (myBBox.height / 2); // Use height for centering
                 y = refBBox.y + refBBox.height + padding;
+
+                // Calculate rotation center (relative to label's origin 0,0)
+                const cxUnder = myBBox.width / 2;
+                const cyUnder = myBBox.height / 2;
+
+                transform = `translate(${x}, ${y}) rotate(90 ${cxUnder} ${cyUnder})`; // Rotate 90 degrees
                 break;
             default:
                 throw new Error(`Invalid alignment: ${alignment}`);
         }
 
         // Set transform to position the label
-        this.setAttr('transform', `translate(${x}, ${y})`);
+        this.setAttr('transform', transform);
     }
 
 }

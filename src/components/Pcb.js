@@ -1,6 +1,7 @@
-import {Group} from '../elements/Group.js';
-import {Rect} from '../elements/Rect.js';
-import {CORNERS, PINSPACE} from '../Constants.js';
+import { Group } from '../elements/Group.js';
+import { Rect } from '../elements/Rect.js';
+import { Image } from '../elements/Image.js'; // Import the new Image element
+import { CORNERS, PINSPACE } from '../Constants.js';
 
 /**
  * Represents the PCB background.
@@ -32,13 +33,16 @@ export class Pcb extends Group {
         const pcbX = -padding;
         const pcbY = -padding;
 
-        if(image?.front?.src) {
-            const img = new Rect(pcbX, pcbY, pcbWidth, pcbHeight, {
-                fill: `url(#${image.front.src})`,
-                rx: CORNERS,
+        if (image?.front?.src) {
+            // Use the new Image element
+            const imgElement = new Image(pcbX, pcbY, pcbWidth, pcbHeight, image.front.src, {
+                preserveAspectRatio: 'xMidYMid slice', // Optional: control how image scales
+                rx: CORNERS, // Note: rx/ry are not standard for <image>, consider clipping if needed
                 ry: CORNERS,
             });
-            this.append(img);
+             // If rounded corners are essential, a clipPath might be needed.
+             // For now, let's keep it simple.
+            this.append(imgElement);
         } else {
 
 

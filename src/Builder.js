@@ -18,6 +18,16 @@ export class Builder {
         width: 7,
         height: 9,
 
+        image: {
+            front: {
+                src: 'https://michiel.vanderwulp.be/domotica/Modules/ESP32-C3-SuperMini/ESP32-C3-SuperMini.jpg',
+                top: -270,
+                left: -100,
+                right: -120,
+                bottom: -50,
+            }
+        },
+
         // pin rows
         left: {
             pins: 8,
@@ -30,12 +40,12 @@ export class Builder {
             xoffset: 0,
         },
         top: {
-            pins: 2,
-            xoffset: 2,
-            yoffset: 1,
+            pins: 0,
+            xoffset: 0,
+            yoffset: 0,
         },
         bottom: {
-            pins: 2,
+            pins: 0,
             xoffset: 1,
             yoffset: 1,
         },
@@ -130,6 +140,8 @@ export class Builder {
         const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
         group.append(pinElement);
 
+        if(!this.setup.pins[row][pinIndex]) return group; // No labels for this pin
+
         let last = pinElement;
         this.setup.pins[row][pinIndex].forEach((pindata, index) => {
             const [text, type] = pindata.split(':');
@@ -170,7 +182,7 @@ export class Builder {
         const svg = new SvgRoot();
 
         // Create and add the PCB background
-        const pcb = new Pcb(this.setup.width, this.setup.height, PINSPACE);
+        const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
         svg.append(pcb);
 
         // this represents the breadboard

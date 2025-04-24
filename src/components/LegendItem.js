@@ -1,7 +1,7 @@
 import {Group} from '../elements/Group.js';
 import {Rect} from '../elements/Rect.js';
 import {Text} from '../elements/Text.js';
-import {FONTSIZE, PADDING} from "../Constants.js";
+import {CORNERS, FONTSIZE, PADDING} from "../Constants.js";
 
 export class LegendItem extends Group {
     /**
@@ -18,7 +18,7 @@ export class LegendItem extends Group {
 
         // Default options
         const {
-            borderRadius = 30,
+            borderRadius = CORNERS,
         } = options;
 
 

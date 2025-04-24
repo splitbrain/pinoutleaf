@@ -35,11 +35,11 @@ export class Pcb extends Group {
 
         if (image?.front?.src) {
             // Use helper to create and adjust the image
-            const imgElement = this._createImageBackground(pcbX, pcbY, pcbWidth, pcbHeight, image.front);
+            const imgElement = this.createImageBackground(pcbX, pcbY, pcbWidth, pcbHeight, image.front);
             this.append(imgElement);
         } else {
             // Use helper to create the rectangle (already correctly called)
-            this.append(this._createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
+            this.append(this.createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
         }
     }
 
@@ -53,7 +53,7 @@ export class Pcb extends Group {
      * @param {object} imageConfig - The image configuration object (e.g., setup.image.front).
      * @returns {Image} The configured Image element.
      */
-    _createImageBackground(basePcbX, basePcbY, basePcbWidth, basePcbHeight, imageConfig) {
+    createImageBackground(basePcbX, basePcbY, basePcbWidth, basePcbHeight, imageConfig) {
         const {
             src,
             top = 0,
@@ -71,7 +71,7 @@ export class Pcb extends Group {
         const imgHeight = basePcbHeight - top - bottom;
 
         return new Image(imgX, imgY, imgWidth, imgHeight, src, {
-            preserveAspectRatio: preserveAspectRatio,
+            preserveAspectRatio: 'none',
             'opacity': opacity,
         });
     }
@@ -86,7 +86,7 @@ export class Pcb extends Group {
      * @param {string} fill - Fill color.
      * @returns {Rect} The configured Rect element.
      */
-    _createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill) {
+    createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill) {
         return new Rect(pcbX, pcbY, pcbWidth, pcbHeight, {
             fill: fill,
             rx: CORNERS,

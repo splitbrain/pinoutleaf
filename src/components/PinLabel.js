@@ -2,6 +2,7 @@
 import {Group} from '../elements/Group.js';
 import {Rect} from '../elements/Rect.js';
 import {Text} from '../elements/Text.js';
+import {CORNERS} from "../Constants.js";
 
 export class PinLabel extends Group {
 
@@ -11,8 +12,8 @@ export class PinLabel extends Group {
 
         // Default options
         const {
-            padding = 30,
-            borderRadius = 30,
+            padding = CORNERS,
+            borderRadius = CORNERS,
             backgroundColor = '#f1c863',
             textColor = '#000000',
         } = options;

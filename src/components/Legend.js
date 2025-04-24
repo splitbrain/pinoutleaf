@@ -2,7 +2,7 @@
 import {Group} from '../elements/Group.js';
 import {Rect} from '../elements/Rect.js';
 import {LegendItem} from './LegendItem.js';
-import {PADDING} from "../Constants.js";
+import {CORNERS, PADDING} from "../Constants.js";
 import {BaseElement} from '../elements/BaseElement.js'; // Needed for static method access
 
 
@@ -97,7 +97,7 @@ export class Legend extends Group {
             itemsBBox.y - PADDING,
             itemsBBox.width + PADDING * 2,
             itemsBBox.height + PADDING * 2,
-            {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30}
+            {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: CORNERS, ry: CORNERS}
         );
     }
 }

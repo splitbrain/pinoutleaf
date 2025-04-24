@@ -5,7 +5,8 @@ import {Rect} from "./elements/Rect.js";
 import {PADDING, PINSIZE, PINSPACE} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
 import {Legend} from "./components/Legend.js";
-import {Title} from "./components/Title.js"; // Import the Title component
+import {Title} from "./components/Title.js";
+import {Pcb} from "./components/Pcb.js"; // Import the Pcb component
 
 export class Builder {
 
@@ -168,12 +169,9 @@ export class Builder {
         // Create SVG root
         const svg = new SvgRoot();
 
-        // Add a background rectangle
-        svg.append(new Rect(-100, -100, (this.setup.width - 1) * PINSPACE + 200, (this.setup.height - 1) * PINSPACE + 200, {
-            fill: '#f8f8f8',
-            cx: 50,
-            cy: 50,
-        }));
+        // Create and add the PCB background
+        const pcb = new Pcb(this.setup.width, this.setup.height, PINSPACE);
+        svg.append(pcb);
 
         // this represents the breadboard
         /*

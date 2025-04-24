@@ -5,6 +5,7 @@ import {Text} from "./elements/Text.js";
 import {Rect} from "./elements/Rect.js";
 import {PINSIZE, PINSPACE, PADDING} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
+import {Legend} from "./components/Legend.js"; // Import the Legend component
 import {Defs} from "./elements/Defs.js";
 
 export class Builder {
@@ -188,9 +189,40 @@ export class Builder {
         // Create pin rows
         svg.append(this.createPinRow('left', 'leftof'));
         svg.append(this.createPinRow('right', 'rightof'));
-        svg.append(this.createPinRow('top', 'above'));
-        svg.append(this.createPinRow('bottom', 'under'));
+        const leftPins = this.createPinRow('left', 'leftof');
+        const rightPins = this.createPinRow('right', 'rightof');
+        const topPins = this.createPinRow('top', 'above');
+        const bottomPins = this.createPinRow('bottom', 'under');
 
+        // Group all pin rows to get their combined bounding box
+        const pinLayoutGroup = new Group();
+        pinLayoutGroup.append(leftPins);
+        pinLayoutGroup.append(rightPins);
+        pinLayoutGroup.append(topPins);
+        pinLayoutGroup.append(bottomPins);
+        svg.append(pinLayoutGroup);
+
+        // Get bounding box of the main pin layout
+        const pinLayoutBBox = pinLayoutGroup.getBoundingBox();
+
+        // Create and position the legend
+        const legend = new Legend(this.setup.types, this.setup.pins);
+        const legendBBox = legend.getBoundingBox();
+
+        if (pinLayoutBBox && legendBBox) {
+            // Position legend to the right of the pin layout with padding
+            const legendX = pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 5;
+            // Align top of legend with top of pin layout
+            const legendY = pinLayoutBBox.y;
+            legend.setTranslate(legendX, legendY);
+        } else {
+            // Fallback position if bounding boxes aren't available
+            legend.setTranslate(PADDING * 5, PADDING * 5);
+        }
+        svg.append(legend);
+
+
+        // Update SVG bounds to include everything
         svg.getBoundingBox();
         return svg;
     }

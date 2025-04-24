@@ -113,7 +113,55 @@ export class Builder {
         }
     }
 
+    /**
+     * Creates a pin with its labels
+     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
+     * @param {number} pinIndex The index of the pin in the row
+     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
+     * @returns {Group} A group containing the pin and its labels
+     */
+    createPinWithLabels(row, pinIndex, alignment) {
+        const group = new Group();
+        const pos = this.pinPosition(row, pinIndex);
+        const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+        group.append(pinElement);
 
+        let last = pinElement;
+        for(let pindata of this.setup.pins[row][pinIndex]) {
+            const [text, type] = pindata.split(':');
+            const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
+
+            const label = new PinLabel(text, {
+                padding: 50,
+                backgroundColor: bgcolor,
+                textColor: fgcolor,
+                borderRadius: 30,
+            });
+            label.align(alignment, last, PADDING);
+            group.append(label);
+            last = label;
+        }
+        
+        return group;
+    }
+
+    /**
+     * Creates a row of pins
+     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
+     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
+     * @returns {Group} A group containing all pins in the row
+     */
+    createPinRow(row, alignment) {
+        const rowGroup = new Group();
+        const pinCount = this.setup[row].pins;
+        
+        for(let pin = 0; pin < pinCount; pin++) {
+            const pinGroup = this.createPinWithLabels(row, pin, alignment);
+            rowGroup.append(pinGroup);
+        }
+        
+        return rowGroup;
+    }
 
     build() {
         // Create SVG root
@@ -130,107 +178,16 @@ export class Builder {
         const breadboard = new Group();
         for(let x = 0; x < this.setup.width; x++) {
             for(let y = 0; y < this.setup.height; y++) {
-                breadboard.append( new Circle(x * PINSPACE, y * PINSPACE, 100 , '#eeeeee') );
+                breadboard.append(new Circle(x * PINSPACE, y * PINSPACE, 100, '#eeeeee'));
             }
         }
         svg.append(breadboard);
 
         // Create pin rows
-        const left = new Group();
-        for(let pin = 0; pin < this.setup.left.pins; pin++) {
-            const pos = this.pinPosition('left', pin);
-            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
-            left.append(pinElement);
-
-            let last = pinElement;
-            for(let pindata of this.setup.pins.left[pin]) {
-                const [text, type] = pindata.split(':');
-                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
-
-                const label = new PinLabel(text, {
-                    padding: 50,
-                    backgroundColor: bgcolor,
-                    textColor: fgcolor,
-                    borderRadius: 30,
-                });
-                label.align('leftof', last, PADDING);
-                left.append(label);
-                last = label;
-            }
-        }
-        svg.append(left);
-
-        const right = new Group();
-        for(let pin = 0; pin < this.setup.right.pins; pin++) {
-            const pos = this.pinPosition('right', pin);
-            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
-            right.append(pinElement);
-
-            let last = pinElement;
-            for(let pindata of this.setup.pins.right[pin]) {
-                const [text, type] = pindata.split(':');
-                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
-
-                const label = new PinLabel(text, {
-                    padding: 50,
-                    backgroundColor: bgcolor,
-                    textColor: fgcolor,
-                    borderRadius: 30,
-                });
-                label.align('rightof', last, PADDING);
-                right.append(label);
-                last = label;
-            }
-        }
-        svg.append(right);
-
-        const top = new Group();
-        for(let pin = 0; pin < this.setup.top.pins; pin++) {
-            const pos = this.pinPosition('top', pin);
-            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
-            top.append(pinElement);
-
-            let last = pinElement;
-            for(let pindata of this.setup.pins.top[pin]) {
-                const [text, type] = pindata.split(':');
-                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
-
-                const label = new PinLabel(text, {
-                    padding: 50,
-                    backgroundColor: bgcolor,
-                    textColor: fgcolor,
-                    borderRadius: 30,
-                });
-                label.align('above', last, PADDING);
-                top.append(label);
-                last = label;
-            }
-        }
-        svg.append(top);
-
-        const bottom = new Group();
-        for(let pin = 0; pin < this.setup.bottom.pins; pin++) {
-            const pos = this.pinPosition('bottom', pin);
-            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
-            bottom.append(pinElement);
-
-            let last = pinElement;
-            for(let pindata of this.setup.pins.bottom[pin]) {
-                const [text, type] = pindata.split(':');
-                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
-
-                const label = new PinLabel(text, {
-                    padding: 50,
-                    backgroundColor: bgcolor,
-                    textColor: fgcolor,
-                    borderRadius: 30,
-                });
-                label.align('under', last, PADDING);
-                bottom.append(label);
-                last = label;
-            }
-        }
-        svg.append(bottom);
+        svg.append(this.createPinRow('left', 'leftof'));
+        svg.append(this.createPinRow('right', 'rightof'));
+        svg.append(this.createPinRow('top', 'above'));
+        svg.append(this.createPinRow('bottom', 'under'));
 
         svg.getBoundingBox();
         return svg;

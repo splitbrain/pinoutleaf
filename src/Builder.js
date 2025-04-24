@@ -1,6 +1,7 @@
 import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
+import {Text} from "./elements/Text.js";
 import {PINSIZE, PINSPACE} from "./Constants.js";
 
 export class Builder {
@@ -96,6 +97,16 @@ export class Builder {
         for(let pin = 0; pin < this.setup.left.pins; pin++) {
             const pos = this.pinPosition('left', pin);
             left.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+            
+            // Add a label for demonstration
+            if (this.setup.pins.left[pin]) {
+                const label = this.setup.pins.left[pin][0].split(':')[0];
+                left.append(new Text(pos.x + PINSIZE * 2, pos.y, label, {
+                    'font-size': 40,
+                    'text-anchor': 'start',
+                    'fill': '#000000'
+                }));
+            }
         }
         svg.append(left);
 

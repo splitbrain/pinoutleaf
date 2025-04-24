@@ -1,6 +1,7 @@
 import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
+import {PINSPACE} from "./Constants.js";
 
 export class Builder {
 
@@ -81,6 +82,13 @@ export class Builder {
         const group = new Group({transform: 'translate(50, 50)'});
         group.append(new Circle(0, 0, 30, 'yellow'));
         group.append(new Circle(60, 0, 30, 'green'));
+
+        for(let x = 0; x < this.setup.width; x++) {
+            for(let y = 0; y < this.setup.height; y++) {
+                svg.append( new Circle(x * PINSPACE, y * PINSPACE, 100 , '#cccccc') );
+            }
+        }
+
 
         // Add group to root
         svg.append(group);

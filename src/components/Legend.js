@@ -1,8 +1,9 @@
 // src/components/Legend.js
-import {Group} from '../elements/Group.js';
-import {Rect} from '../elements/Rect.js';
-import {LegendItem} from './LegendItem.js';
-import {FONTSIZE, PADDING} from "../Constants.js"; // Import the new component
+import { Group } from '../elements/Group.js';
+import { Rect } from '../elements/Rect.js';
+import { LegendItem } from './LegendItem.js';
+import { FONTSIZE, PADDING } from "../Constants.js";
+import { BaseElement } from '../elements/BaseElement.js'; // Needed for static method access
 
 
 export class Legend extends Group {
@@ -12,21 +13,28 @@ export class Legend extends Group {
      * @param {object} pinsData - The pin definitions from setup.pins (e.g., setup.pins.left).
      */
     constructor(allTypes, pinsData) {
-        super(); // Initialize the group
+        super();
 
-        const usedTypeNames = this._getUsedTypes(pinsData, allTypes);
-        this._createAndPositionItems(usedTypeNames, allTypes);
-        this._addBackground();
+        const usedTypeNames = this.getUsedTypes(pinsData, allTypes);
+        const items = this.createLegendItems(usedTypeNames, allTypes);
+
+        if (items.length === 0) {
+            return; // No legend needed if no types are used
+        }
+
+        const itemsBBox = BaseElement.getCombinedBoundingBox(items);
+        const background = this.createBackground(itemsBBox);
+
+        if (background) {
+            this.prepend(background);
+        }
+        this.children.push(...items); // Append all items at once
     }
 
     /**
      * Determines the set of pin type names used in the pin definitions.
-     * @param {object} pinsData - The pin definitions (e.g., setup.pins).
-     * @param {object} allTypes - The full map of type definitions (e.g., setup.types).
-     * @returns {Set<string>} A set of used type names.
-     * @private
      */
-    _getUsedTypes(pinsData, allTypes) {
+    getUsedTypes(pinsData, allTypes) {
         const usedTypeNames = new Set();
         let usesDefaultImplicitly = false;
 
@@ -54,57 +62,49 @@ export class Legend extends Group {
     }
 
     /**
-     * Creates LegendItem instances for each used type, positions them vertically,
-     * and appends them to this group.
-     * @param {Set<string>} usedTypeNames - The set of type names to include.
-     * @param {object} allTypes - The full map of type definitions.
-     * @private
+     * Creates and positions LegendItem instances for each used type.
+     * @returns {LegendItem[]} An array of positioned LegendItem elements.
      */
-    _createAndPositionItems(usedTypeNames, allTypes) {
+    createLegendItems(usedTypeNames, allTypes) {
         let currentY = PADDING;
-        const usedTypesArray = Array.from(usedTypeNames).sort(); // Sort for consistent order
+        const items = [];
+        const usedTypesArray = Array.from(usedTypeNames).sort();
 
         usedTypesArray.forEach(typeName => {
-            const typeInfo = allTypes[typeName]; // Directly access type; default handled by _getUsedTypes
-            // We assume _getUsedTypes only returns types present in allTypes or 'default' if used.
+            const typeInfo = allTypes[typeName];
             if (!typeInfo) {
                  console.warn(`Legend: Type info for "${typeName}" not found in setup.types. Skipping.`);
-                 return; // Skip if type somehow missing (shouldn't happen with current logic)
+                 return;
             }
 
-            // Create a LegendItem instance
             const legendItem = new LegendItem(typeInfo.label ?? typeName, typeInfo.bgcolor);
+            legendItem.setTranslate(PADDING, currentY); // Position item
+            items.push(legendItem);
 
-            // Position the item group vertically
-            legendItem.setTranslate(PADDING, currentY);
-            this.append(legendItem);
-
-            // Update Y for the next item
             const itemBBox = legendItem.getBoundingBox();
-            const itemHeight = itemBBox ? itemBBox.height : FONTSIZE; // Fallback height
-            currentY += itemHeight + PADDING; // Use PADDING as vertical spacing
+            // Use item's height for spacing, with a fallback
+            const itemHeight = itemBBox?.height ?? FONTSIZE;
+            currentY += itemHeight + PADDING;
         });
+        return items;
     }
 
     /**
-     * Calculates the bounding box of the legend items and adds a background rectangle.
-     * @private
+     * Creates a background rectangle based on the bounding box of legend items.
+     * @param {object|null} itemsBBox - The bounding box { x, y, width, height } of the items.
+     * @returns {Rect|null} The background Rect element or null.
      */
-    _addBackground() {
-        // Calculate bbox *after* all items are added and positioned
-        const itemsBBox = super.getBoundingBox(); // Get bbox of items only
-
-        if (itemsBBox) {
-            const background = new Rect(
-                itemsBBox.x - PADDING, // Adjust background position based on items bbox
-                itemsBBox.y - PADDING,
-                itemsBBox.width + PADDING * 2,
-                itemsBBox.height + PADDING * 2,
-                { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
-            );
-            // Insert background at the beginning so it's rendered behind items
-            this.prepend(background);
+    createBackground(itemsBBox) {
+        if (!itemsBBox) {
+            return null;
         }
-        // Note: The Legend's own getBoundingBox() will now include the background
+
+        return new Rect(
+            itemsBBox.x - PADDING,
+            itemsBBox.y - PADDING,
+            itemsBBox.width + PADDING * 2,
+            itemsBBox.height + PADDING * 2,
+            { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
+        );
     }
 }

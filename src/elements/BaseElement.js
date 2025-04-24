@@ -21,9 +21,50 @@ export class BaseElement {
         return this;
     }
 
+    /**
+     * Calculates the combined bounding box of an array of elements.
+     * @param {BaseElement[]} elements - An array of elements.
+     * @returns {object|null} The combined bounding box { x, y, width, height } or null if no elements have bounds.
+     */
+    static getCombinedBoundingBox(elements) {
+        if (!elements || elements.length === 0) {
+            return null;
+        }
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        let hasValidBounds = false;
+
+        for (const element of elements) {
+            // Ensure element has the method and call it
+            if (typeof element?.getBoundingBox === 'function') {
+                const bbox = element.getBoundingBox();
+                if (bbox) {
+                    minX = Math.min(minX, bbox.x);
+                    minY = Math.min(minY, bbox.y);
+                    maxX = Math.max(maxX, bbox.x + bbox.width);
+                    maxY = Math.max(maxY, bbox.y + bbox.height);
+                    hasValidBounds = true;
+                }
+            }
+        }
+
+        if (!hasValidBounds) {
+            return null;
+        }
+
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+    }
+
+
     getBoundingBox() {
-        // Default implementation returns null
-        // Child classes should override this
         if (this.children.length === 0) {
             return null;
         }

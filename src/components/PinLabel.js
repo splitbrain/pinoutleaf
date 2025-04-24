@@ -94,7 +94,7 @@ export class PinLabel extends Group {
                 // Note: Rotated label's effective height is myBBox.width
                 targetCx = refCx;
                 targetCy = refBBox.y + refBBox.height + padding + (myBBox.width / 2); // Use width for vertical offset
-                rotationAngle = 90;
+                rotationAngle = -90;
                 break;
             default:
                 throw new Error(`Invalid alignment: ${alignment}`);

@@ -103,12 +103,12 @@ export class Builder {
                 ['GPIO 0:gpio', 'A0:analog'],
             ],
             top: [
-                ['GND:gnd'],
+                ['GND:gnd', 'A4:analog', 'SCK:spi'],
                 ['5V:power'],
             ],
             bottom: [
                 ['GND:gnd'],
-                ['5V:power'],
+                ['5V:power', 'A4:analog', 'SCK:spi'],
             ],
         }
     }
@@ -127,7 +127,7 @@ export class Builder {
         group.append(pinElement);
 
         let last = pinElement;
-        for(let pindata of this.setup.pins[row][pinIndex]) {
+        this.setup.pins[row][pinIndex].forEach((pindata, index) => {
             const [text, type] = pindata.split(':');
             const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
 
@@ -137,11 +137,11 @@ export class Builder {
                 textColor: fgcolor,
                 borderRadius: 30,
             });
-            label.align(alignment, last, PADDING);
+            label.align(alignment, last, index ? PADDING : PADDING * 3); // add more padding for the first label
             group.append(label);
             last = label;
-        }
-        
+        });
+
         return group;
     }
 
@@ -154,12 +154,12 @@ export class Builder {
     createPinRow(row, alignment) {
         const rowGroup = new Group();
         const pinCount = this.setup[row].pins;
-        
+
         for(let pin = 0; pin < pinCount; pin++) {
             const pinGroup = this.createPinWithLabels(row, pin, alignment);
             rowGroup.append(pinGroup);
         }
-        
+
         return rowGroup;
     }
 
@@ -175,6 +175,7 @@ export class Builder {
         }));
 
         // this represents the breadboard
+        /*
         const breadboard = new Group();
         for(let x = 0; x < this.setup.width; x++) {
             for(let y = 0; y < this.setup.height; y++) {
@@ -182,6 +183,7 @@ export class Builder {
             }
         }
         svg.append(breadboard);
+       */
 
         // Create pin rows
         svg.append(this.createPinRow('left', 'leftof'));

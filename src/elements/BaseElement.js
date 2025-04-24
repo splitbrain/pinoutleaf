@@ -15,6 +15,43 @@ export class BaseElement {
         return this;
     }
 
+    getBoundingBox() {
+        // Default implementation returns null
+        // Child classes should override this
+        if (this.children.length === 0) {
+            return null;
+        }
+
+        // If we have children, compute the bounding box from them
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        let hasValidBounds = false;
+
+        for (const child of this.children) {
+            const bbox = child.getBoundingBox();
+            if (bbox) {
+                minX = Math.min(minX, bbox.x);
+                minY = Math.min(minY, bbox.y);
+                maxX = Math.max(maxX, bbox.x + bbox.width);
+                maxY = Math.max(maxY, bbox.y + bbox.height);
+                hasValidBounds = true;
+            }
+        }
+
+        if (!hasValidBounds) {
+            return null;
+        }
+
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+    }
+
     render(document) {
         const el = document.createElementNS('http://www.w3.org/2000/svg', this.name);
 

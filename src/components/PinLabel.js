@@ -74,28 +74,40 @@ export class PinLabel extends Group {
                 y = refBBox.y + (refBBox.height / 2) - (myBBox.height / 2);
                 transform = `translate(${x}, ${y})`;
                 break;
-            case 'above':
-                // Calculate position considering rotated dimensions
-                x = refBBox.x + (refBBox.width / 2) - (myBBox.height / 2); // Use height for centering
-                y = refBBox.y - myBBox.width - padding; // Use width for vertical positioning
+            case 'above': {
+                // Center of the unrotated label
+                const labelCx = myBBox.width / 2;
+                const labelCy = myBBox.height / 2;
 
-                // Calculate rotation center (relative to label's origin 0,0)
-                const cxAbove = myBBox.width / 2;
-                const cyAbove = myBBox.height / 2;
+                // Target center position for the rotated label
+                const targetCx = refBBox.x + refBBox.width / 2;
+                // Rotated label height is myBBox.width. Place its center above ref element.
+                const targetCy = refBBox.y - padding - (myBBox.width / 2);
 
-                transform = `translate(${x}, ${y}) rotate(-90 ${cxAbove} ${cyAbove})`; // Rotate -90 degrees
+                // Translation needed to move label center to target center
+                const translateX = targetCx - labelCx;
+                const translateY = targetCy - labelCy;
+
+                transform = `translate(${translateX}, ${translateY}) rotate(-90 ${labelCx} ${labelCy})`;
                 break;
-            case 'under':
-                 // Calculate position considering rotated dimensions
-                x = refBBox.x + (refBBox.width / 2) - (myBBox.height / 2); // Use height for centering
-                y = refBBox.y + refBBox.height + padding;
+            }
+            case 'under': {
+                // Center of the unrotated label
+                const labelCx = myBBox.width / 2;
+                const labelCy = myBBox.height / 2;
 
-                // Calculate rotation center (relative to label's origin 0,0)
-                const cxUnder = myBBox.width / 2;
-                const cyUnder = myBBox.height / 2;
+                // Target center position for the rotated label
+                const targetCx = refBBox.x + refBBox.width / 2;
+                // Rotated label height is myBBox.width. Place its center under ref element.
+                const targetCy = refBBox.y + refBBox.height + padding + (myBBox.width / 2);
 
-                transform = `translate(${x}, ${y}) rotate(90 ${cxUnder} ${cyUnder})`; // Rotate 90 degrees
+                // Translation needed to move label center to target center
+                const translateX = targetCx - labelCx;
+                const translateY = targetCy - labelCy;
+
+                transform = `translate(${translateX}, ${translateY}) rotate(90 ${labelCx} ${labelCy})`;
                 break;
+            }
             default:
                 throw new Error(`Invalid alignment: ${alignment}`);
         }

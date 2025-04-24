@@ -56,63 +56,63 @@ export class PinLabel extends Group {
      */
     align(alignment, reference, padding = 0) {
         // Get the bounding box of the group
+        // Get bounding boxes
         const myBBox = this.getBoundingBox();
         const refBBox = reference.getBoundingBox();
 
-        let x = 0;
-        let y = 0;
-        let transform = ''; // Initialize transform string
+        // Calculate centers
+        const labelCx = myBBox.width / 2;
+        const labelCy = myBBox.height / 2;
+        const refCx = refBBox.x + refBBox.width / 2;
+        const refCy = refBBox.y + refBBox.height / 2;
+
+        // Determine target center and rotation based on alignment
+        let targetCx = 0;
+        let targetCy = 0;
+        let rotationAngle = 0;
 
         switch (alignment) {
             case 'leftof':
-                x = refBBox.x - myBBox.width - padding;
-                y = refBBox.y + (refBBox.height / 2) - (myBBox.height / 2);
-                transform = `translate(${x}, ${y})`;
+                // Target center is left of reference bbox, vertically aligned with reference center
+                targetCx = refBBox.x - padding - labelCx; // target x for label center
+                targetCy = refCy;                       // target y for label center
                 break;
             case 'rightof':
-                x = refBBox.x + refBBox.width + padding;
-                y = refBBox.y + (refBBox.height / 2) - (myBBox.height / 2);
-                transform = `translate(${x}, ${y})`;
+                // Target center is right of reference bbox, vertically aligned with reference center
+                targetCx = refBBox.x + refBBox.width + padding + labelCx; // target x for label center
+                targetCy = refCy;                                        // target y for label center
                 break;
-            case 'above': {
-                // Center of the unrotated label
-                const labelCx = myBBox.width / 2;
-                const labelCy = myBBox.height / 2;
-
-                // Target center position for the rotated label
-                const targetCx = refBBox.x + refBBox.width / 2;
-                // Rotated label height is myBBox.width. Place its center above ref element.
-                const targetCy = refBBox.y - padding - (myBBox.width / 2);
-
-                // Translation needed to move label center to target center
-                const translateX = targetCx - labelCx;
-                const translateY = targetCy - labelCy;
-
-                transform = `translate(${translateX}, ${translateY}) rotate(-90 ${labelCx} ${labelCy})`;
+            case 'above':
+                // Target center is above reference bbox, horizontally aligned with reference center
+                // Note: Rotated label's effective height is myBBox.width
+                targetCx = refCx;
+                targetCy = refBBox.y - padding - (myBBox.width / 2); // Use width for vertical offset due to rotation
+                rotationAngle = -90;
                 break;
-            }
-            case 'under': {
-                // Center of the unrotated label
-                const labelCx = myBBox.width / 2;
-                const labelCy = myBBox.height / 2;
-
-                // Target center position for the rotated label
-                const targetCx = refBBox.x + refBBox.width / 2;
-                // Rotated label height is myBBox.width. Place its center under ref element.
-                const targetCy = refBBox.y + refBBox.height + padding + (myBBox.width / 2);
-
-                // Translation needed to move label center to target center
-                const translateX = targetCx - labelCx;
-                const translateY = targetCy - labelCy;
-
-                transform = `translate(${translateX}, ${translateY}) rotate(90 ${labelCx} ${labelCy})`;
+            case 'under':
+                // Target center is under reference bbox, horizontally aligned with reference center
+                // Note: Rotated label's effective height is myBBox.width
+                targetCx = refCx;
+                targetCy = refBBox.y + refBBox.height + padding + (myBBox.width / 2); // Use width for vertical offset
+                rotationAngle = 90;
                 break;
-            }
             default:
                 throw new Error(`Invalid alignment: ${alignment}`);
         }
 
-        // Set transform to position the label
+        // Calculate translation needed to move label's origin (0,0)
+        // so that its center (labelCx, labelCy) ends up at (targetCx, targetCy)
+        // after rotation (if any) around (labelCx, labelCy).
+        const translateX = targetCx - labelCx;
+        const translateY = targetCy - labelCy;
+
+        // Construct the transform string
+        let transform = `translate(${translateX}, ${translateY})`;
+        if (rotationAngle !== 0) {
+            transform += ` rotate(${rotationAngle} ${labelCx} ${labelCy})`;
+        }
+
+        // Set the final transform attribute
         this.setAttr('transform', transform);
     }
 

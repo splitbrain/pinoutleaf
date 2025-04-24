@@ -34,17 +34,11 @@ export class Pcb extends Group {
         const pcbY = -padding;
 
         if (image?.front?.src) {
-            const imgElement = new Image(pcbX, pcbY, pcbWidth, pcbHeight, image.front.src, {
-                preserveAspectRatio: 'xMidYMid slice',
-                'opacity': 0.5,
-            });
+            // Use helper to create and adjust the image
+            const imgElement = this._createImageBackground(pcbX, pcbY, pcbWidth, pcbHeight, image.front);
             this.append(imgElement);
         } else {
-            const backgroundRect = new Rect(pcbX, pcbY, pcbWidth, pcbHeight, {
-                fill: fill,
-                rx: CORNERS,
-                ry: CORNERS,
-            });
+            // Use helper to create the rectangle (already correctly called)
             this.append(this._createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
         }
     }

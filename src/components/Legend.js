@@ -2,7 +2,7 @@
 import {Group} from '../elements/Group.js';
 import {Rect} from '../elements/Rect.js';
 import {LegendItem} from './LegendItem.js';
-import {FONTSIZE, PADDING} from "../Constants.js";
+import {PADDING} from "../Constants.js";
 import {BaseElement} from '../elements/BaseElement.js'; // Needed for static method access
 
 

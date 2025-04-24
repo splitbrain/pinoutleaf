@@ -1,19 +1,17 @@
 import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
-import {Text} from "./elements/Text.js";
 import {Rect} from "./elements/Rect.js";
-import {PINSIZE, PINSPACE, PADDING} from "./Constants.js";
+import {PADDING, PINSIZE, PINSPACE} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
 import {Legend} from "./components/Legend.js";
 import {Title} from "./components/Title.js"; // Import the Title component
-import {Defs} from "./elements/Defs.js";
 
 export class Builder {
 
     setup = {
         // Diagram Title
-        title: "My Microcontroller Pinout",
+        title: "ESP32 C3 Super Mini",
 
         // size in pins
         width: 7,
@@ -158,7 +156,7 @@ export class Builder {
         const rowGroup = new Group();
         const pinCount = this.setup[row].pins;
 
-        for(let pin = 0; pin < pinCount; pin++) {
+        for (let pin = 0; pin < pinCount; pin++) {
             const pinGroup = this.createPinWithLabels(row, pin, alignment);
             rowGroup.append(pinGroup);
         }
@@ -171,7 +169,7 @@ export class Builder {
         const svg = new SvgRoot();
 
         // Add a background rectangle
-        svg.append(new Rect(-100, -100, (this.setup.width-1) * PINSPACE + 200, (this.setup.height-1) * PINSPACE + 200, {
+        svg.append(new Rect(-100, -100, (this.setup.width - 1) * PINSPACE + 200, (this.setup.height - 1) * PINSPACE + 200, {
             fill: '#f8f8f8',
             cx: 50,
             cy: 50,
@@ -188,79 +186,34 @@ export class Builder {
         svg.append(breadboard);
        */
 
-        // Create pin rows
-        svg.append(this.createPinRow('left', 'leftof'));
-        svg.append(this.createPinRow('right', 'rightof'));
-        const leftPins = this.createPinRow('left', 'leftof');
-        const rightPins = this.createPinRow('right', 'rightof');
-        const topPins = this.createPinRow('top', 'above');
-        const bottomPins = this.createPinRow('bottom', 'under');
 
-        // Group all pin rows to get their combined bounding box
+        // Create pin rows
         const pinLayoutGroup = new Group();
-        pinLayoutGroup.append(leftPins);
-        pinLayoutGroup.append(rightPins);
-        pinLayoutGroup.append(topPins);
-        pinLayoutGroup.append(bottomPins);
+        pinLayoutGroup.append(this.createPinRow('left', 'leftof'));
+        pinLayoutGroup.append(this.createPinRow('right', 'rightof'));
+        pinLayoutGroup.append(this.createPinRow('top', 'above'));
+        pinLayoutGroup.append(this.createPinRow('bottom', 'under'));
         svg.append(pinLayoutGroup);
 
-        // Get bounding box of the main pin layout
-        const pinLayoutBBox = pinLayoutGroup.getBoundingBox();
+        // Create the title
+        const title = new Title(this.setup.title);
+        svg.append(title)
 
-        // Create and position the legend
+        // Create the legend
         const legend = new Legend(this.setup.types, this.setup.pins);
-        const legendBBox = legend.getBoundingBox();
-
-        if (pinLayoutBBox && legendBBox) {
-            // Position legend to the right of the pin layout with padding
-            const legendX = pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 5;
-            // Align top of legend with top of pin layout
-            const legendY = pinLayoutBBox.y;
-            legend.setTranslate(legendX, legendY);
-        } else {
-            // Fallback position if bounding boxes aren't available
-            legend.setTranslate(PADDING * 5, PADDING * 5);
-        }
         svg.append(legend);
 
 
-        // Update SVG bounds to include everything
-        // Create and position the Title
-        const title = new Title(this.setup.title);
+        // Get bounding box of the main pin layout
+        const pinLayoutBBox = pinLayoutGroup.getBoundingBox();
+        const legendBBox = legend.getBoundingBox();
         const titleBBox = title.getBoundingBox();
 
-        // Position title centered above the pin layout
-        if (pinLayoutBBox && titleBBox) {
-            const titleX = pinLayoutBBox.x + pinLayoutBBox.width / 2;
-            // Position title above the pin layout with padding
-            const titleY = pinLayoutBBox.y - PADDING * 3; // Adjust padding as needed
-            title.setTranslate(titleX, titleY);
-        } else {
-             // Fallback position
-            title.setTranslate(PADDING * 5, PADDING * 2);
-        }
-        svg.prepend(title); // Add title before other elements
+        // Position title above the pin layout, left aligned
+        title.setTranslate(pinLayoutBBox.x, pinLayoutBBox.y - PADDING - titleBBox.height);
 
-        // --- Reposition Legend based on Title and Pin Layout ---
-        const combinedTopBBox = Group.getCombinedBoundingBox([title, pinLayoutGroup]);
-
-        if (combinedTopBBox && legendBBox) {
-            // Position legend to the right of the combined title and pin layout
-            const legendX = combinedTopBBox.x + combinedTopBBox.width + PADDING * 5;
-            // Align top of legend with top of the combined group
-            const legendY = combinedTopBBox.y;
-            legend.setTranslate(legendX, legendY);
-        } else if (pinLayoutBBox && legendBBox) {
-            // Fallback: Position relative to pin layout if combined fails
-            const legendX = pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 5;
-            const legendY = pinLayoutBBox.y;
-            legend.setTranslate(legendX, legendY);
-        } else {
-            // Further fallback
-            legend.setTranslate(PADDING * 5, PADDING * 5);
-        }
-        // Legend is already added to svg, just need to ensure its position is updated if needed.
-        // Since setTranslate modifies the object state, and render uses it, it should be fine.
+        // Position legend to the right of the pin layout with padding
+        legend.setTranslate(pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 3, pinLayoutBBox.y);
 
         // Update SVG bounds to include everything
         svg.getBoundingBox();

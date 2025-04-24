@@ -11,6 +11,11 @@ export class BaseElement {
         return this;
     }
 
+    prepend(child) {
+        this.children.unshift(child);
+        return this;
+    }
+
     setAttr(name, value) {
         this.attrs[name] = value;
         return this;
@@ -65,7 +70,7 @@ export class BaseElement {
         for (const child of this.children) {
             el.appendChild(child.render(document));
         }
-        
+
         // Set text content if it exists
         if (this.textContent !== null) {
             el.textContent = this.textContent;

@@ -1,4 +1,5 @@
 import { BaseElement } from './BaseElement.js';
+import {FONTSIZE} from "../Constants.js";
 
 export class Text extends BaseElement {
   constructor(x, y, text, attrs = {}) {
@@ -9,6 +10,7 @@ export class Text extends BaseElement {
       // align on top left corner
       'dominant-baseline': 'hanging',
       'font-family': 'Roboto Mono, monospace',
+      'font-size': FONTSIZE,
     });
     this.text = text;
   }

@@ -11,16 +11,14 @@ export class PinLabel extends Group {
 
         // Default options
         const {
-            padding = 50,
+            padding = 30,
             borderRadius = 30,
             backgroundColor = '#f1c863',
             textColor = '#000000',
-            fontSize = 100
         } = options;
 
         // Create text element
         const textElement = new Text(padding, padding, text, {
-            'font-size': fontSize,
             'fill': textColor,
         });
 

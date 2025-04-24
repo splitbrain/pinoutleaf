@@ -1,8 +1,7 @@
 // src/components/Legend.js
-import { Group } from '../elements/Group.js';
-import { Rect } from '../elements/Rect.js';
-import { Text } from '../elements/Text.js';
-import { LegendItem } from './LegendItem.js'; // Import the new component
+import {Group} from '../elements/Group.js';
+import {Rect} from '../elements/Rect.js';
+import {LegendItem} from './LegendItem.js'; // Import the new component
 
 const SWATCH_SIZE = 100;
 const V_SPACING = 50; // Vertical spacing between items
@@ -48,8 +47,8 @@ export class Legend extends Group {
 
         // Ensure 'default' type is included if present in allTypes
         if ('default' in allTypes && !usedTypeNames.has('default')) {
-             // Check if any pin uses the default implicitly
-             for (const rowKey in pinsData) {
+            // Check if any pin uses the default implicitly
+            for (const rowKey in pinsData) {
                 if (pinsData[rowKey].some(pinLabels => pinLabels.some(labelData => !labelData.includes(':')))) {
                     usedTypeNames.add('default');
                     break;
@@ -64,14 +63,11 @@ export class Legend extends Group {
 
         usedTypesArray.forEach(typeName => {
             const typeInfo = allTypes[typeName] || allTypes.default; // Fallback to default if type missing?
-            if (!typeInfo) continue; // Skip if type (and default) is not defined
+            if (!typeInfo) return; // Skip if type (and default) is not defined
 
             // Create a LegendItem instance
-            const legendItem = new LegendItem(typeName, typeInfo, {
-                swatchSize,
-                hSpacing,
-                fontSize
-            });
+            const legendItem = new LegendItem(typeInfo.label ?? typeName, typeInfo.bgcolor);
+
 
             // Position the item group vertically within the Legend group
             // Note: LegendItem's internal elements are relative to its (0,0)
@@ -85,21 +81,21 @@ export class Legend extends Group {
             currentY += itemHeight + vSpacing;
         });
 
-         // Optional: Add a background rect for the whole legend
-         // Important: Calculate bbox *after* all items are added and positioned
-         const itemsBBox = super.getBoundingBox(); // Get bbox of items only (before background)
+        // Optional: Add a background rect for the whole legend
+        // Important: Calculate bbox *after* all items are added and positioned
+        const itemsBBox = super.getBoundingBox(); // Get bbox of items only (before background)
 
-         if (itemsBBox) {
-             const background = new Rect(
-                 itemsBBox.x - padding, // Adjust background position based on items bbox
-                 itemsBBox.y - padding,
-                 itemsBBox.width + padding * 2,
-                 itemsBBox.height + padding * 2,
-                 { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
-             );
-             // Insert background at the beginning so it's rendered behind items
-             this.children.unshift(background);
-         }
-         // Note: The Legend's own getBoundingBox() will now include the background
+        if (itemsBBox) {
+            const background = new Rect(
+                itemsBBox.x - padding, // Adjust background position based on items bbox
+                itemsBBox.y - padding,
+                itemsBBox.width + padding * 2,
+                itemsBBox.height + padding * 2,
+                {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30}
+            );
+            // Insert background at the beginning so it's rendered behind items
+            this.prepend(background);
+        }
+        // Note: The Legend's own getBoundingBox() will now include the background
     }
 }

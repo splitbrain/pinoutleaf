@@ -55,7 +55,7 @@ export class Builder {
                 fgcolor: '#ffffff',
             },
             gnd: {
-                label: 'GND',
+                label: 'Ground',
                 bgcolor: '#333333',
                 fgcolor: '#ffffff',
             },
@@ -133,10 +133,8 @@ export class Builder {
             const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
 
             const label = new PinLabel(text, {
-                padding: 50,
                 backgroundColor: bgcolor,
                 textColor: fgcolor,
-                borderRadius: 30,
             });
             label.align(alignment, last, index ? PADDING : PADDING * 3); // add more padding for the first label
             group.append(label);

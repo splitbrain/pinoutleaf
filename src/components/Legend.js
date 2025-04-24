@@ -1,34 +1,18 @@
 // src/components/Legend.js
 import {Group} from '../elements/Group.js';
 import {Rect} from '../elements/Rect.js';
-import {LegendItem} from './LegendItem.js'; // Import the new component
+import {LegendItem} from './LegendItem.js';
+import {FONTSIZE, PADDING} from "../Constants.js"; // Import the new component
 
-const SWATCH_SIZE = 100;
-const V_SPACING = 50; // Vertical spacing between items
-const H_SPACING = 30; // Horizontal spacing between swatch and text
-const FONT_SIZE = 100;
-const PADDING = 50; // Padding around the legend content
 
 export class Legend extends Group {
     /**
      * Creates a legend component.
      * @param {object} allTypes - The full map of type names to {bgcolor, fgcolor} from setup.types.
      * @param {object} pinsData - The pin definitions from setup.pins (e.g., setup.pins.left).
-     * @param {object} [options={}] - Optional configuration.
-     * @param {number} [options.fontSize=FONT_SIZE] - Font size for labels.
-     * @param {number} [options.swatchSize=SWATCH_SIZE] - Size of the color swatch.
-     * @param {number} [options.vSpacing=V_SPACING] - Vertical spacing between legend items.
-     * @param {number} [options.hSpacing=H_SPACING] - Horizontal spacing between swatch and text.
-     * @param {number} [options.padding=PADDING] - Padding around the legend content.
      */
-    constructor(allTypes, pinsData, options = {}) {
+    constructor(allTypes, pinsData) {
         super(); // Initialize the group
-
-        const fontSize = options.fontSize ?? FONT_SIZE;
-        const swatchSize = options.swatchSize ?? SWATCH_SIZE;
-        const vSpacing = options.vSpacing ?? V_SPACING;
-        const hSpacing = options.hSpacing ?? H_SPACING;
-        const padding = options.padding ?? PADDING;
 
         // 1. Determine used types
         const usedTypeNames = new Set();
@@ -58,7 +42,7 @@ export class Legend extends Group {
 
 
         // 2. Create legend items for used types
-        let currentY = padding;
+        let currentY = PADDING;
         const usedTypesArray = Array.from(usedTypeNames).sort(); // Sort for consistent order
 
         usedTypesArray.forEach(typeName => {
@@ -72,13 +56,13 @@ export class Legend extends Group {
             // Position the item group vertically within the Legend group
             // Note: LegendItem's internal elements are relative to its (0,0)
             // We translate the entire LegendItem group.
-            legendItem.setTranslate(padding, currentY);
+            legendItem.setTranslate(PADDING, currentY);
             this.append(legendItem);
 
             // Update Y for the next item using the actual bounding box height
             const itemBBox = legendItem.getBoundingBox();
-            const itemHeight = itemBBox ? itemBBox.height : Math.max(swatchSize, fontSize); // Fallback height
-            currentY += itemHeight + vSpacing;
+            const itemHeight = itemBBox ? itemBBox.height : FONTSIZE; // Fallback height
+            currentY += itemHeight + PADDING;
         });
 
         // Optional: Add a background rect for the whole legend
@@ -87,10 +71,10 @@ export class Legend extends Group {
 
         if (itemsBBox) {
             const background = new Rect(
-                itemsBBox.x - padding, // Adjust background position based on items bbox
-                itemsBBox.y - padding,
-                itemsBBox.width + padding * 2,
-                itemsBBox.height + padding * 2,
+                itemsBBox.x - PADDING, // Adjust background position based on items bbox
+                itemsBBox.y - PADDING,
+                itemsBBox.width + PADDING * 2,
+                itemsBBox.height + PADDING * 2,
                 {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30}
             );
             // Insert background at the beginning so it's rendered behind items

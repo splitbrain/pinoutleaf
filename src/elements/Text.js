@@ -7,9 +7,8 @@ export class Text extends BaseElement {
       y,
       ...attrs,
       // align on top left corner
-      'dominant-baseline': 'text-top',
-      'alignment-baseline': 'text-before-edge',
-      'font-family': 'Arial',
+      'dominant-baseline': 'hanging',
+      'font-family': 'Roboto Mono, monospace',
     });
     this.text = text;
   }

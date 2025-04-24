@@ -4,6 +4,8 @@ import {Circle} from "./elements/Circle.js";
 import {Text} from "./elements/Text.js";
 import {Rect} from "./elements/Rect.js";
 import {PINSIZE, PINSPACE} from "./Constants.js";
+import {PinLabel} from "./components/PinLabel.js";
+import {Defs} from "./elements/Defs.js";
 
 export class Builder {
 
@@ -106,15 +108,10 @@ export class Builder {
             const pos = this.pinPosition('left', pin);
             left.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
 
-            // Add a label for demonstration
-            if (this.setup.pins.left[pin]) {
-                const label = this.setup.pins.left[pin][0].split(':')[0];
-                left.append(new Text(pos.x + PINSIZE * 2, pos.y, label, {
-                    'font-size': 40,
-                    'text-anchor': 'start',
-                    'fill': '#000000'
-                }));
-            }
+            const text = this.setup.pins.left[pin][0];
+
+            const label = new PinLabel(text);
+            left.append(label);
         }
         svg.append(left);
 

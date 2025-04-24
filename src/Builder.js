@@ -1,31 +1,35 @@
 import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
-import {PINSPACE} from "./Constants.js";
+import {PINSIZE, PINSPACE} from "./Constants.js";
 
 export class Builder {
 
     setup = {
         // size in pins
-        width: 6,
+        width: 7,
         height: 9,
 
         // pin rows
         left: {
-            pins: 8,
-            offset: 0,
+            pins: 3,
+            yoffset: 2,
+            xoffset: 0,
         },
         right: {
-            pins: 8,
-            offset: 0,
+            pins: 6,
+            yoffset: 1,
+            xoffset: 1,
         },
         top: {
-            pins: 0,
-            offset: 0,
+            pins: 2,
+            xoffset: 2,
+            yoffset: 1,
         },
         bottom: {
-            pins: 0,
-            offset: 0,
+            pins: 2,
+            xoffset: 1,
+            yoffset: 1,
         },
 
         // types
@@ -78,21 +82,78 @@ export class Builder {
         // Create SVG root
         const svg = new SvgRoot();
 
-        // Create a group with a transformation
-        const group = new Group({transform: 'translate(50, 50)'});
-        group.append(new Circle(0, 0, 30, 'yellow'));
-        group.append(new Circle(60, 0, 30, 'green'));
-
+        // this represents the breadboard
+        const breadboard = new Group();
         for(let x = 0; x < this.setup.width; x++) {
             for(let y = 0; y < this.setup.height; y++) {
-                svg.append( new Circle(x * PINSPACE, y * PINSPACE, 100 , '#cccccc') );
+                breadboard.append( new Circle(x * PINSPACE, y * PINSPACE, 100 , '#eeeeee') );
             }
         }
+        svg.append(breadboard);
 
+        // Create pin rows
+        const left = new Group();
+        for(let pin = 0; pin < this.setup.left.pins; pin++) {
+            const pos = this.pinPosition('left', pin);
+            left.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+        }
+        svg.append(left);
 
-        // Add group to root
-        svg.append(group);
+        const right = new Group();
+        for(let pin = 0; pin < this.setup.right.pins; pin++) {
+            const pos = this.pinPosition('right', pin);
+            right.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+        }
+        svg.append(right);
 
+        const top = new Group();
+        for(let pin = 0; pin < this.setup.top.pins; pin++) {
+            const pos = this.pinPosition('top', pin);
+            top.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+        }
+        svg.append(top);
+
+        const bottom = new Group();
+        for(let pin = 0; pin < this.setup.bottom.pins; pin++) {
+            const pos = this.pinPosition('bottom', pin);
+            bottom.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+        }
+        svg.append(bottom);
+
+        svg.getBoundingBox();
         return svg;
+    }
+
+    /**
+     *
+     * @param {string} row The row to get the pin position for. Can be 'left', 'right', 'top', or 'bottom'.
+     * @param {int} pin The pin number in the row.
+     * @returns {{x: number, y: number}} The x and y coordinates of the pin position.
+     */
+    pinPosition(row, pin) {
+        switch (row) {
+            case 'left':
+                return {
+                    x: this.setup.left.xoffset * PINSPACE,
+                    y: (this.setup.left.yoffset + pin) * PINSPACE
+                };
+            case 'right':
+                return {
+                    x: (this.setup.width - 1 - this.setup.right.xoffset) * PINSPACE,
+                    y: (this.setup.right.yoffset + pin) * PINSPACE
+                };
+            case 'top':
+                return {
+                    x: (this.setup.top.xoffset + pin) * PINSPACE,
+                    y: this.setup.top.yoffset * PINSPACE
+                };
+            case 'bottom':
+                return {
+                    x: (this.setup.bottom.xoffset + pin) * PINSPACE,
+                    y: (this.setup.height - 1 - this.setup.bottom.yoffset) * PINSPACE
+                };
+            default:
+                throw new Error(`Invalid row: ${row}`);
+        }
     }
 }

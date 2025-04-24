@@ -1,9 +1,9 @@
 // src/components/Legend.js
-import { Group } from '../elements/Group.js';
-import { Rect } from '../elements/Rect.js';
-import { LegendItem } from './LegendItem.js';
-import { FONTSIZE, PADDING } from "../Constants.js";
-import { BaseElement } from '../elements/BaseElement.js'; // Needed for static method access
+import {Group} from '../elements/Group.js';
+import {Rect} from '../elements/Rect.js';
+import {LegendItem} from './LegendItem.js';
+import {FONTSIZE, PADDING} from "../Constants.js";
+import {BaseElement} from '../elements/BaseElement.js'; // Needed for static method access
 
 
 export class Legend extends Group {
@@ -15,8 +15,8 @@ export class Legend extends Group {
     constructor(allTypes, pinsData) {
         super();
 
-        const usedTypeNames = this.getUsedTypes(pinsData, allTypes);
-        const items = this.createLegendItems(usedTypeNames, allTypes);
+        const usedTypes = this.getUsedTypes(pinsData, allTypes);
+        const items = this.createLegendItems(usedTypes);
 
         if (items.length === 0) {
             return; // No legend needed if no types are used
@@ -33,8 +33,8 @@ export class Legend extends Group {
 
     /**
      * Determines the unique types used and retrieves their label and background color.
-     * @returns {Map<string, {label: string, bgcolor: string}>} A map where keys are type names
-     *          and values are objects containing the label and background color for the legend.
+     *
+     * @returns {Map<string, {label: string, bgcolor: string}>}
      */
     getUsedTypes(pinsData, allTypes) {
         const usedTypeInfo = new Map();
@@ -43,16 +43,14 @@ export class Legend extends Group {
             pinsData[rowKey].forEach(pinLabels => {
                 pinLabels.forEach(labelData => {
                     const parts = labelData.split(':');
-                    const typeName = (parts.length > 1) ? parts[1] : 'default';
+                    const typeName = (parts.length > 1 && allTypes[parts[1]]) ? parts[1] : 'default';
+                    if (usedTypeInfo.has(typeName)) return;
 
-                    // Add type only if it's defined in allTypes and not already added
-                    if (!usedTypeInfo.has(typeName) && allTypes[typeName]) {
-                        const typeDefinition = allTypes[typeName];
-                        usedTypeInfo.set(typeName, {
-                            label: typeDefinition.label ?? typeName, // Use typeName as fallback label
-                            bgcolor: typeDefinition.bgcolor
-                        });
-                    }
+                    const typeDefinition = allTypes[typeName];
+                    usedTypeInfo.set(typeName, {
+                        label: typeDefinition.label ?? typeName,
+                        bgcolor: typeDefinition.bgcolor
+                    });
                 });
             });
         }
@@ -79,9 +77,7 @@ export class Legend extends Group {
             items.push(legendItem);
 
             const itemBBox = legendItem.getBoundingBox();
-            // Use item's height for spacing, with a fallback
-            const itemHeight = itemBBox?.height ?? FONTSIZE;
-            currentY += itemHeight + PADDING;
+            currentY += itemBBox.height + PADDING;
         });
         return items;
     }
@@ -101,7 +97,7 @@ export class Legend extends Group {
             itemsBBox.y - PADDING,
             itemsBBox.width + PADDING * 2,
             itemsBBox.height + PADDING * 2,
-            { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
+            {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30}
         );
     }
 }

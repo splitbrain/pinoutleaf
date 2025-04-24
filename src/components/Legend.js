@@ -86,17 +86,20 @@ export class Legend extends Group {
         });
 
          // Optional: Add a background rect for the whole legend
-         const legendBBox = this.getBoundingBox(); // Get bbox of items *before* adding background
-         if (legendBBox) {
+         // Important: Calculate bbox *after* all items are added and positioned
+         const itemsBBox = super.getBoundingBox(); // Get bbox of items only (before background)
+
+         if (itemsBBox) {
              const background = new Rect(
-                 legendBBox.x - padding,
-                 legendBBox.y - padding,
-                 legendBBox.width + padding * 2,
-                 legendBBox.height + padding * 2,
+                 itemsBBox.x - padding, // Adjust background position based on items bbox
+                 itemsBBox.y - padding,
+                 itemsBBox.width + padding * 2,
+                 itemsBBox.height + padding * 2,
                  { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
              );
-             // Insert background at the beginning so it's behind items
+             // Insert background at the beginning so it's rendered behind items
              this.children.unshift(background);
          }
+         // Note: The Legend's own getBoundingBox() will now include the background
     }
-}        
+}

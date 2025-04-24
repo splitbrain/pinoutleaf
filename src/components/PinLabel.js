@@ -106,14 +106,9 @@ export class PinLabel extends Group {
         const translateX = targetCx - labelCx;
         const translateY = targetCy - labelCy;
 
-        // Construct the transform string
-        let transform = `translate(${translateX}, ${translateY})`;
-        if (rotationAngle !== 0) {
-            transform += ` rotate(${rotationAngle} ${labelCx} ${labelCy})`;
-        }
-
-        // Set the final transform attribute
-        this.setAttr('transform', transform);
+        // Apply the calculated translation and rotation using the new methods
+        this.setTranslate(translateX, translateY);
+        this.setRotation(rotationAngle); // Handles 0 angle correctly
     }
 
 }

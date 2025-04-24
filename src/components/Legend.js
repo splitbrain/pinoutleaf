@@ -14,8 +14,22 @@ export class Legend extends Group {
     constructor(allTypes, pinsData) {
         super(); // Initialize the group
 
-        // 1. Determine used types
+        const usedTypeNames = this._getUsedTypes(pinsData, allTypes);
+        this._createAndPositionItems(usedTypeNames, allTypes);
+        this._addBackground();
+    }
+
+    /**
+     * Determines the set of pin type names used in the pin definitions.
+     * @param {object} pinsData - The pin definitions (e.g., setup.pins).
+     * @param {object} allTypes - The full map of type definitions (e.g., setup.types).
+     * @returns {Set<string>} A set of used type names.
+     * @private
+     */
+    _getUsedTypes(pinsData, allTypes) {
         const usedTypeNames = new Set();
+        let usesDefaultImplicitly = false;
+
         for (const rowKey in pinsData) {
             pinsData[rowKey].forEach(pinLabels => {
                 pinLabels.forEach(labelData => {
@@ -23,51 +37,62 @@ export class Legend extends Group {
                     if (parts.length > 1) {
                         usedTypeNames.add(parts[1]);
                     } else {
-                        usedTypeNames.add('default'); // Assume default if no type specified
+                        usedTypeNames.add('default'); // Explicitly add 'default'
+                        usesDefaultImplicitly = true; // Mark that default was used
                     }
                 });
             });
         }
 
-        // Ensure 'default' type is included if present in allTypes
-        if ('default' in allTypes && !usedTypeNames.has('default')) {
-            // Check if any pin uses the default implicitly
-            for (const rowKey in pinsData) {
-                if (pinsData[rowKey].some(pinLabels => pinLabels.some(labelData => !labelData.includes(':')))) {
-                    usedTypeNames.add('default');
-                    break;
-                }
-            }
+        // Ensure 'default' type is included if it exists in allTypes and was used implicitly,
+        // even if no pin explicitly specified ':default'.
+        if ('default' in allTypes && usesDefaultImplicitly) {
+             usedTypeNames.add('default');
         }
 
+        return usedTypeNames;
+    }
 
-        // 2. Create legend items for used types
+    /**
+     * Creates LegendItem instances for each used type, positions them vertically,
+     * and appends them to this group.
+     * @param {Set<string>} usedTypeNames - The set of type names to include.
+     * @param {object} allTypes - The full map of type definitions.
+     * @private
+     */
+    _createAndPositionItems(usedTypeNames, allTypes) {
         let currentY = PADDING;
         const usedTypesArray = Array.from(usedTypeNames).sort(); // Sort for consistent order
 
         usedTypesArray.forEach(typeName => {
-            const typeInfo = allTypes[typeName] || allTypes.default; // Fallback to default if type missing?
-            if (!typeInfo) return; // Skip if type (and default) is not defined
+            const typeInfo = allTypes[typeName]; // Directly access type; default handled by _getUsedTypes
+            // We assume _getUsedTypes only returns types present in allTypes or 'default' if used.
+            if (!typeInfo) {
+                 console.warn(`Legend: Type info for "${typeName}" not found in setup.types. Skipping.`);
+                 return; // Skip if type somehow missing (shouldn't happen with current logic)
+            }
 
             // Create a LegendItem instance
             const legendItem = new LegendItem(typeInfo.label ?? typeName, typeInfo.bgcolor);
 
-
-            // Position the item group vertically within the Legend group
-            // Note: LegendItem's internal elements are relative to its (0,0)
-            // We translate the entire LegendItem group.
+            // Position the item group vertically
             legendItem.setTranslate(PADDING, currentY);
             this.append(legendItem);
 
-            // Update Y for the next item using the actual bounding box height
+            // Update Y for the next item
             const itemBBox = legendItem.getBoundingBox();
             const itemHeight = itemBBox ? itemBBox.height : FONTSIZE; // Fallback height
-            currentY += itemHeight + PADDING;
+            currentY += itemHeight + PADDING; // Use PADDING as vertical spacing
         });
+    }
 
-        // Optional: Add a background rect for the whole legend
-        // Important: Calculate bbox *after* all items are added and positioned
-        const itemsBBox = super.getBoundingBox(); // Get bbox of items only (before background)
+    /**
+     * Calculates the bounding box of the legend items and adds a background rectangle.
+     * @private
+     */
+    _addBackground() {
+        // Calculate bbox *after* all items are added and positioned
+        const itemsBBox = super.getBoundingBox(); // Get bbox of items only
 
         if (itemsBBox) {
             const background = new Rect(
@@ -75,7 +100,7 @@ export class Legend extends Group {
                 itemsBBox.y - PADDING,
                 itemsBBox.width + PADDING * 2,
                 itemsBBox.height + PADDING * 2,
-                {fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30}
+                { fill: '#ffffff', stroke: '#cccccc', 'stroke-width': 10, rx: 30, ry: 30 }
             );
             // Insert background at the beginning so it's rendered behind items
             this.prepend(background);

@@ -2,6 +2,7 @@
 import { Group } from '../elements/Group.js';
 import { Rect } from '../elements/Rect.js';
 import { Text } from '../elements/Text.js';
+import { LegendItem } from './LegendItem.js'; // Import the new component
 
 const SWATCH_SIZE = 100;
 const V_SPACING = 50; // Vertical spacing between items
@@ -63,34 +64,24 @@ export class Legend extends Group {
 
         usedTypesArray.forEach(typeName => {
             const typeInfo = allTypes[typeName] || allTypes.default; // Fallback to default if type missing?
-            if (!typeInfo) return; // Skip if type (and default) is not defined
+            if (!typeInfo) continue; // Skip if type (and default) is not defined
 
-            const itemGroup = new Group();
+            // Create a LegendItem instance
+            const legendItem = new LegendItem(typeName, typeInfo, {
+                swatchSize,
+                hSpacing,
+                fontSize
+            });
 
-            // Color Swatch
-            const swatch = new Rect(padding, 0, swatchSize, swatchSize, { fill: typeInfo.bgcolor });
-            itemGroup.append(swatch);
+            // Position the item group vertically within the Legend group
+            // Note: LegendItem's internal elements are relative to its (0,0)
+            // We translate the entire LegendItem group.
+            legendItem.setTranslate(padding, currentY);
+            this.append(legendItem);
 
-            // Type Label
-            const label = new Text(
-                padding + swatchSize + hSpacing,
-                swatchSize / 2, // Vertically center text relative to swatch
-                typeName,
-                {
-                    'font-size': fontSize,
-                    'fill': typeInfo.fgcolor || '#000000', // Default text color if not specified
-                    'dominant-baseline': 'middle' // Better vertical centering
-                }
-            );
-            itemGroup.append(label);
-
-            // Position the item group vertically
-            itemGroup.setTranslate(0, currentY);
-            this.append(itemGroup);
-
-            // Update Y for next item (use item's height + spacing)
-            // Approximating item height based on swatch and font size for now
-            const itemHeight = Math.max(swatchSize, fontSize);
+            // Update Y for the next item using the actual bounding box height
+            const itemBBox = legendItem.getBoundingBox();
+            const itemHeight = itemBBox ? itemBBox.height : Math.max(swatchSize, fontSize); // Fallback height
             currentY += itemHeight + vSpacing;
         });
 

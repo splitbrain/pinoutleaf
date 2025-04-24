@@ -45,7 +45,58 @@ export class Pcb extends Group {
                 rx: CORNERS,
                 ry: CORNERS,
             });
-            this.append(backgroundRect);
+            this.append(this._createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
         }
+    }
+
+    /**
+     * Creates the background image element with adjustments.
+     * @private
+     * @param {number} basePcbX - Base X position.
+     * @param {number} basePcbY - Base Y position.
+     * @param {number} basePcbWidth - Base width.
+     * @param {number} basePcbHeight - Base height.
+     * @param {object} imageConfig - The image configuration object (e.g., setup.image.front).
+     * @returns {Image} The configured Image element.
+     */
+    _createImageBackground(basePcbX, basePcbY, basePcbWidth, basePcbHeight, imageConfig) {
+        const {
+            src,
+            top = 0,
+            left = 0,
+            right = 0,
+            bottom = 0,
+            opacity = 0.5, // Default opacity if not specified
+            preserveAspectRatio = 'xMidYMid slice' // Default aspect ratio
+        } = imageConfig;
+
+        // Adjust dimensions based on top, left, right, bottom offsets
+        const imgX = basePcbX + left;
+        const imgY = basePcbY + top;
+        const imgWidth = basePcbWidth - left - right;
+        const imgHeight = basePcbHeight - top - bottom;
+
+        return new Image(imgX, imgY, imgWidth, imgHeight, src, {
+            preserveAspectRatio: preserveAspectRatio,
+            'opacity': opacity,
+        });
+    }
+
+    /**
+     * Creates the background rectangle element.
+     * @private
+     * @param {number} pcbX - X position.
+     * @param {number} pcbY - Y position.
+     * @param {number} pcbWidth - Width.
+     * @param {number} pcbHeight - Height.
+     * @param {string} fill - Fill color.
+     * @returns {Rect} The configured Rect element.
+     */
+    _createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill) {
+        return new Rect(pcbX, pcbY, pcbWidth, pcbHeight, {
+            fill: fill,
+            rx: CORNERS,
+            ry: CORNERS,
+        });
     }
 }

@@ -23,16 +23,26 @@ const cliOptions = {
         js: '#!/usr/bin/env node',
     },
 }
+const browserOptions = {
+    ...commonOptions,
+    entryPoints: ['./src/web.js'],
+    outfile: './dist/web.js',
+    platform: 'browser',
+    format: 'esm',
+    define: {
+        global: 'window'
+    },
+}
 
 async function build() {
     try {
         if (watch) {
             // Watch mode
-            //const browserCtx = await esbuild.context(browserOptions);
+            const browserCtx = await esbuild.context(browserOptions);
             const cliCtx = await esbuild.context(cliOptions);
 
             await Promise.all([
-                //browserCtx.watch(),
+                browserCtx.watch(),
                 cliCtx.watch()
             ]);
 
@@ -40,7 +50,7 @@ async function build() {
         } else {
             // Build once
 
-            //esbuild.build(browserOptions),
+            esbuild.build(browserOptions),
             esbuild.build(cliOptions);
 
 

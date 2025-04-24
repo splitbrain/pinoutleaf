@@ -75,7 +75,7 @@ export class Builder {
 
     build() {
         // Create SVG root
-        const svg = new SvgRoot(300, 300);
+        const svg = new SvgRoot();
 
         // Create a group with a transformation
         const group = new Group({transform: 'translate(50, 50)'});

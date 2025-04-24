@@ -7,7 +7,8 @@
   "main": "index.js",
   "scripts": {
     "build": "node build.js",
-    "watch": "node build.js --watch"
+    "watch": "node build.js --watch",
+    "serve": "npx http-server -o ./dist"
   },
   "devDependencies": {
     "esbuild": "^0.25.3"

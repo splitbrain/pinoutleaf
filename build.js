@@ -2,6 +2,7 @@ import * as esbuild from 'esbuild'
 import { mkdir } from 'fs/promises';
 
 const watch = process.argv.includes('--watch');
+const serve = process.argv.includes('--serve');
 
 await mkdir('./dist', { recursive: true });
 
@@ -36,7 +37,24 @@ const browserOptions = {
 
 async function build() {
     try {
-        if (watch) {
+        if (serve) {
+            // Serve mode with hot reloading
+            const browserCtx = await esbuild.context(browserOptions);
+            const cliCtx = await esbuild.context(cliOptions);
+
+            // Also watch for changes
+            await Promise.all([
+                browserCtx.serve({
+                    servedir: './dist',
+                    host: 'localhost',
+                    port: 8000,
+                }),
+                browserCtx.watch(),
+                cliCtx.watch()
+            ]);
+
+            console.log('Serving on http://localhost:8000');
+        } else if (watch) {
             // Watch mode
             const browserCtx = await esbuild.context(browserOptions);
             const cliCtx = await esbuild.context(cliOptions);
@@ -49,10 +67,10 @@ async function build() {
             console.log('Watching for changes...');
         } else {
             // Build once
-
-            esbuild.build(browserOptions),
-            esbuild.build(cliOptions);
-
+            await Promise.all([
+                esbuild.build(browserOptions),
+                esbuild.build(cliOptions)
+            ]);
 
             console.log('All builds completed successfully!');
         }

@@ -79,7 +79,7 @@ export class Builder {
 
         // Create a group with a transformation
         const group = new Group({transform: 'translate(50, 50)'});
-        group.append(new Circle(0, 0, 30, 'blue'));
+        group.append(new Circle(0, 0, 30, 'yellow'));
         group.append(new Circle(60, 0, 30, 'green'));
 
         // Add group to root

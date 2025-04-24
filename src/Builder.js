@@ -3,7 +3,7 @@ import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
 import {Text} from "./elements/Text.js";
 import {Rect} from "./elements/Rect.js";
-import {PINSIZE, PINSPACE} from "./Constants.js";
+import {PINSIZE, PINSPACE, PADDING} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
 import {Defs} from "./elements/Defs.js";
 
@@ -16,14 +16,14 @@ export class Builder {
 
         // pin rows
         left: {
-            pins: 3,
-            yoffset: 2,
+            pins: 8,
+            yoffset: 0,
             xoffset: 0,
         },
         right: {
-            pins: 6,
-            yoffset: 1,
-            xoffset: 1,
+            pins: 8,
+            yoffset: 0,
+            xoffset: 0,
         },
         top: {
             pins: 2,
@@ -50,7 +50,32 @@ export class Builder {
             },
             power: {
                 label: 'Power',
-                bgcolor: '#ffb3b3',
+                bgcolor: '#ff3333',
+                fgcolor: '#ffffff',
+            },
+            gnd: {
+                label: 'GND',
+                bgcolor: '#333333',
+                fgcolor: '#ffffff',
+            },
+            i2c: {
+                label: 'I2C',
+                bgcolor: '#e1b4ef',
+                fgcolor: '#000000',
+            },
+            uart: {
+                label: 'UART',
+                bgcolor: '#669098',
+                fgcolor: '#ffffff',
+            },
+            spi: {
+                label: 'SPI',
+                bgcolor: '#9125cd',
+                fgcolor: '#ffffff',
+            },
+            analog: {
+                label: 'Analogue',
+                bgcolor: '#f1c863',
                 fgcolor: '#000000',
             },
         },
@@ -58,25 +83,33 @@ export class Builder {
         // pin label:type, each pin can have multiple labels
         pins: {
             left: [
-                ['GPIO5:gpio', 'A5:analog', 'MISO:spi'],
-                ['GPIO6:gpio', 'MOSI:spi', 'SCK:spi'],
-                ['GPIO7:gpio', 'SS:spi'],
-                ['GPIO8:gpio', 'SDA:i2c'],
-                ['GPIO9:gpio', 'SCL:i2c'],
-                ['GPIO10:gpio'],
-                ['GPIO20:gpio', 'RX:uart'],
-                ['GPIO21:gpio', 'TX:uart'],
+                ['GPIO 5:gpio', 'A5:analog', 'MISO:spi'],
+                ['GPIO 6:gpio', 'MOSI:spi', 'SCK:spi'],
+                ['GPIO 7:gpio', 'SS:spi'],
+                ['GPIO 8:gpio', 'SDA:i2c'],
+                ['GPIO 9:gpio', 'SCL:i2c'],
+                ['GPIO 10:gpio'],
+                ['GPIO 20:gpio', 'RX:uart'],
+                ['GPIO 21:gpio', 'TX:uart'],
             ],
             right: [
                 ['5V:power'],
                 ['GND:gnd'],
                 ['3V3:power'],
-                ['GPIO4:gpio', 'A4:analog', 'SCK:spi'],
-                ['GPIO3:gpio', 'A3:analog', 'MOSI:spi'],
-                ['GPIO2:gpio', 'A2:analog'],
-                ['GPIO1:gpio', 'A1:analog'],
-                ['GPIO0:gpio', 'A0:analog'],
-            ]
+                ['GPIO 4:gpio', 'A4:analog', 'SCK:spi'],
+                ['GPIO 3:gpio', 'A3:analog', 'MOSI:spi'],
+                ['GPIO 2:gpio', 'A2:analog'],
+                ['GPIO 1:gpio', 'A1:analog'],
+                ['GPIO 0:gpio', 'A0:analog'],
+            ],
+            top: [
+                ['GND:gnd'],
+                ['5V:power'],
+            ],
+            bottom: [
+                ['GND:gnd'],
+                ['5V:power'],
+            ],
         }
     }
 
@@ -106,33 +139,96 @@ export class Builder {
         const left = new Group();
         for(let pin = 0; pin < this.setup.left.pins; pin++) {
             const pos = this.pinPosition('left', pin);
-            left.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+            left.append(pinElement);
 
-            const text = this.setup.pins.left[pin][0];
+            let last = pinElement;
+            for(let pindata of this.setup.pins.left[pin]) {
+                const [text, type] = pindata.split(':');
+                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
 
-            const label = new PinLabel(text);
-            left.append(label);
+                const label = new PinLabel(text, {
+                    padding: 50,
+                    backgroundColor: bgcolor,
+                    textColor: fgcolor,
+                    borderRadius: 30,
+                });
+                label.align('leftof', last, PADDING);
+                left.append(label);
+                last = label;
+            }
         }
         svg.append(left);
 
         const right = new Group();
         for(let pin = 0; pin < this.setup.right.pins; pin++) {
             const pos = this.pinPosition('right', pin);
-            right.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+            right.append(pinElement);
+
+            let last = pinElement;
+            for(let pindata of this.setup.pins.right[pin]) {
+                const [text, type] = pindata.split(':');
+                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
+
+                const label = new PinLabel(text, {
+                    padding: 50,
+                    backgroundColor: bgcolor,
+                    textColor: fgcolor,
+                    borderRadius: 30,
+                });
+                label.align('rightof', last, PADDING);
+                right.append(label);
+                last = label;
+            }
         }
         svg.append(right);
 
         const top = new Group();
         for(let pin = 0; pin < this.setup.top.pins; pin++) {
             const pos = this.pinPosition('top', pin);
-            top.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+            top.append(pinElement);
+
+            let last = pinElement;
+            for(let pindata of this.setup.pins.top[pin]) {
+                const [text, type] = pindata.split(':');
+                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
+
+                const label = new PinLabel(text, {
+                    padding: 50,
+                    backgroundColor: bgcolor,
+                    textColor: fgcolor,
+                    borderRadius: 30,
+                });
+                label.align('above', last, PADDING);
+                top.append(label);
+                last = label;
+            }
         }
         svg.append(top);
 
         const bottom = new Group();
         for(let pin = 0; pin < this.setup.bottom.pins; pin++) {
             const pos = this.pinPosition('bottom', pin);
-            bottom.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
+            const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+            bottom.append(pinElement);
+
+            let last = pinElement;
+            for(let pindata of this.setup.pins.bottom[pin]) {
+                const [text, type] = pindata.split(':');
+                const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
+
+                const label = new PinLabel(text, {
+                    padding: 50,
+                    backgroundColor: bgcolor,
+                    textColor: fgcolor,
+                    borderRadius: 30,
+                });
+                label.align('under', last, PADDING);
+                bottom.append(label);
+                last = label;
+            }
         }
         svg.append(bottom);
 

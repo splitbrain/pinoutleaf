@@ -6,6 +6,10 @@ export class Text extends BaseElement {
       x,
       y,
       ...attrs,
+      // align on top left corner
+      'dominant-baseline': 'text-top',
+      'alignment-baseline': 'text-before-edge',
+      'font-family': 'Arial',
     });
     this.text = text;
   }

@@ -2,6 +2,7 @@ import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
 import {Text} from "./elements/Text.js";
+import {Rect} from "./elements/Rect.js";
 import {PINSIZE, PINSPACE} from "./Constants.js";
 
 export class Builder {
@@ -83,6 +84,13 @@ export class Builder {
         // Create SVG root
         const svg = new SvgRoot();
 
+        // Add a background rectangle
+        svg.append(new Rect(-100, -100, (this.setup.width-1) * PINSPACE + 200, (this.setup.height-1) * PINSPACE + 200, {
+            fill: '#f8f8f8',
+            cx: 50,
+            cy: 50,
+        }));
+
         // this represents the breadboard
         const breadboard = new Group();
         for(let x = 0; x < this.setup.width; x++) {
@@ -97,7 +105,7 @@ export class Builder {
         for(let pin = 0; pin < this.setup.left.pins; pin++) {
             const pos = this.pinPosition('left', pin);
             left.append(new Circle(pos.x, pos.y, PINSIZE, 'gold'));
-            
+
             // Add a label for demonstration
             if (this.setup.pins.left[pin]) {
                 const label = this.setup.pins.left[pin][0].split(':')[0];

@@ -1,10 +1,15 @@
 import { BaseElement } from './BaseElement.js';
+import { Defs } from './Defs.js';
 
 export class SvgRoot extends BaseElement {
     constructor() {
         super('svg', {
             xmlns: 'http://www.w3.org/2000/svg',
         });
+        
+        // Create defs element for definitions
+        this.defs = new Defs();
+        this.append(this.defs);
     }
 
     getBoundingBox() {

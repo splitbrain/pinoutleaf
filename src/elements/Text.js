@@ -33,20 +33,8 @@ export class Text extends BaseElement {
   }
 
   render(document) {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', this.name);
-
-    for (const [key, val] of Object.entries(this.attrs)) {
-      if (typeof key === 'string' && val != null) {
-        el.setAttribute(String(key), String(val));
-      }
-    }
-
-    el.textContent = this.text;
-
-    for (const child of this.children) {
-      el.appendChild(child.render(document));
-    }
-
-    return el;
+    // Set the text content before rendering
+    this.textContent = this.text;
+    return super.render(document);
   }
 }

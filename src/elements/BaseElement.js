@@ -3,6 +3,7 @@ export class BaseElement {
         this.name = name;
         this.attrs = { ...attrs };
         this.children = [...children];
+        this.textContent = null;
     }
 
     append(child) {
@@ -63,6 +64,11 @@ export class BaseElement {
 
         for (const child of this.children) {
             el.appendChild(child.render(document));
+        }
+        
+        // Set text content if it exists
+        if (this.textContent !== null) {
+            el.textContent = this.textContent;
         }
 
         return el;

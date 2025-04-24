@@ -5,12 +5,16 @@ import {Text} from "./elements/Text.js";
 import {Rect} from "./elements/Rect.js";
 import {PINSIZE, PINSPACE, PADDING} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
-import {Legend} from "./components/Legend.js"; // Import the Legend component
+import {Legend} from "./components/Legend.js";
+import {Title} from "./components/Title.js"; // Import the Title component
 import {Defs} from "./elements/Defs.js";
 
 export class Builder {
 
     setup = {
+        // Diagram Title
+        title: "My Microcontroller Pinout",
+
         // size in pins
         width: 7,
         height: 9,
@@ -219,6 +223,44 @@ export class Builder {
         }
         svg.append(legend);
 
+
+        // Update SVG bounds to include everything
+        // Create and position the Title
+        const title = new Title(this.setup.title);
+        const titleBBox = title.getBoundingBox();
+
+        // Position title centered above the pin layout
+        if (pinLayoutBBox && titleBBox) {
+            const titleX = pinLayoutBBox.x + pinLayoutBBox.width / 2;
+            // Position title above the pin layout with padding
+            const titleY = pinLayoutBBox.y - PADDING * 3; // Adjust padding as needed
+            title.setTranslate(titleX, titleY);
+        } else {
+             // Fallback position
+            title.setTranslate(PADDING * 5, PADDING * 2);
+        }
+        svg.prepend(title); // Add title before other elements
+
+        // --- Reposition Legend based on Title and Pin Layout ---
+        const combinedTopBBox = Group.getCombinedBoundingBox([title, pinLayoutGroup]);
+
+        if (combinedTopBBox && legendBBox) {
+            // Position legend to the right of the combined title and pin layout
+            const legendX = combinedTopBBox.x + combinedTopBBox.width + PADDING * 5;
+            // Align top of legend with top of the combined group
+            const legendY = combinedTopBBox.y;
+            legend.setTranslate(legendX, legendY);
+        } else if (pinLayoutBBox && legendBBox) {
+            // Fallback: Position relative to pin layout if combined fails
+            const legendX = pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 5;
+            const legendY = pinLayoutBBox.y;
+            legend.setTranslate(legendX, legendY);
+        } else {
+            // Further fallback
+            legend.setTranslate(PADDING * 5, PADDING * 5);
+        }
+        // Legend is already added to svg, just need to ensure its position is updated if needed.
+        // Since setTranslate modifies the object state, and render uses it, it should be fine.
 
         // Update SVG bounds to include everything
         svg.getBoundingBox();

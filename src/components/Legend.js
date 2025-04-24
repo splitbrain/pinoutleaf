@@ -32,52 +32,49 @@ export class Legend extends Group {
     }
 
     /**
-     * Determines the set of pin type names used in the pin definitions.
+     * Determines the unique types used and retrieves their label and background color.
+     * @returns {Map<string, {label: string, bgcolor: string}>} A map where keys are type names
+     *          and values are objects containing the label and background color for the legend.
      */
     getUsedTypes(pinsData, allTypes) {
-        const usedTypeNames = new Set();
-        let usesDefaultImplicitly = false;
+        const usedTypeInfo = new Map();
 
         for (const rowKey in pinsData) {
             pinsData[rowKey].forEach(pinLabels => {
                 pinLabels.forEach(labelData => {
                     const parts = labelData.split(':');
-                    if (parts.length > 1) {
-                        usedTypeNames.add(parts[1]);
-                    } else {
-                        usedTypeNames.add('default'); // Explicitly add 'default'
-                        usesDefaultImplicitly = true; // Mark that default was used
+                    const typeName = (parts.length > 1) ? parts[1] : 'default';
+
+                    // Add type only if it's defined in allTypes and not already added
+                    if (!usedTypeInfo.has(typeName) && allTypes[typeName]) {
+                        const typeDefinition = allTypes[typeName];
+                        usedTypeInfo.set(typeName, {
+                            label: typeDefinition.label ?? typeName, // Use typeName as fallback label
+                            bgcolor: typeDefinition.bgcolor
+                        });
                     }
                 });
             });
         }
-
-        // Ensure 'default' type is included if it exists in allTypes and was used implicitly,
-        // even if no pin explicitly specified ':default'.
-        if ('default' in allTypes && usesDefaultImplicitly) {
-             usedTypeNames.add('default');
-        }
-
-        return usedTypeNames;
+        return usedTypeInfo;
     }
 
     /**
      * Creates and positions LegendItem instances for each used type.
+     * @param {Map<string, {label: string, bgcolor: string}>} usedTypeInfo - Map from getUsedTypes.
      * @returns {LegendItem[]} An array of positioned LegendItem elements.
      */
-    createLegendItems(usedTypeNames, allTypes) {
+    createLegendItems(usedTypeInfo) {
         let currentY = PADDING;
         const items = [];
-        const usedTypesArray = Array.from(usedTypeNames).sort();
 
-        usedTypesArray.forEach(typeName => {
-            const typeInfo = allTypes[typeName];
-            if (!typeInfo) {
-                 console.warn(`Legend: Type info for "${typeName}" not found in setup.types. Skipping.`);
-                 return;
-            }
+        // Sort items by label for consistent legend order
+        const sortedItemsData = Array.from(usedTypeInfo.values()).sort((a, b) =>
+            a.label.localeCompare(b.label)
+        );
 
-            const legendItem = new LegendItem(typeInfo.label ?? typeName, typeInfo.bgcolor);
+        sortedItemsData.forEach(itemData => {
+            const legendItem = new LegendItem(itemData.label, itemData.bgcolor);
             legendItem.setTranslate(PADDING, currentY); // Position item
             items.push(legendItem);
 

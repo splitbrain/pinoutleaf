@@ -25,6 +25,9 @@ export class Builder {
                 left: -100,
                 right: -120,
                 bottom: -50,
+            },
+            back: {
+                src: 'https://www.elecbee.com/image/cache/catalog/bg/esp32-c3-development-board-esp32-supermini-wifi-bluetooth-mini-module_1-800x800.jpg',
             }
         },
 
@@ -128,55 +131,10 @@ export class Builder {
     }
 
     /**
-     * Creates a pin with its labels
-     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
-     * @param {number} pinIndex The index of the pin in the row
-     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
-     * @returns {Group} A group containing the pin and its labels
+     * Create the whole diagram
+     *
+     * @returns {SvgRoot}
      */
-    createPinWithLabels(row, pinIndex, alignment) {
-        const group = new Group();
-        const pos = this.pinPosition(row, pinIndex);
-        const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
-        group.append(pinElement);
-
-        if(!this.setup.pins[row][pinIndex]) return group; // No labels for this pin
-
-        let last = pinElement;
-        this.setup.pins[row][pinIndex].forEach((pindata, index) => {
-            const [text, type] = pindata.split(':');
-            const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
-
-            const label = new PinLabel(text, {
-                backgroundColor: bgcolor,
-                textColor: fgcolor,
-            });
-            label.align(alignment, last, index ? PADDING : PADDING * 3); // add more padding for the first label
-            group.append(label);
-            last = label;
-        });
-
-        return group;
-    }
-
-    /**
-     * Creates a row of pins
-     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
-     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
-     * @returns {Group} A group containing all pins in the row
-     */
-    createPinRow(row, alignment) {
-        const rowGroup = new Group();
-        const pinCount = this.setup[row].pins;
-
-        for (let pin = 0; pin < pinCount; pin++) {
-            const pinGroup = this.createPinWithLabels(row, pin, alignment);
-            rowGroup.append(pinGroup);
-        }
-
-        return rowGroup;
-    }
-
     build() {
         // Create SVG root
         const svg = new SvgRoot();
@@ -228,6 +186,66 @@ export class Builder {
         // Update SVG bounds to include everything
         svg.getBoundingBox();
         return svg;
+    }
+
+    /**
+     * Flip the PCB
+     *
+     * This directly modifies the setup object to flip the PCB. It flips the right and left pins,
+     * reverses the order of the top and bottom pins and swaps the front and back images.
+     */
+    flip() {
+
+    }
+
+    /**
+     * Creates a pin with its labels
+     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
+     * @param {number} pinIndex The index of the pin in the row
+     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
+     * @returns {Group} A group containing the pin and its labels
+     */
+    createPinWithLabels(row, pinIndex, alignment) {
+        const group = new Group();
+        const pos = this.pinPosition(row, pinIndex);
+        const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
+        group.append(pinElement);
+
+        if(!this.setup.pins[row][pinIndex]) return group; // No labels for this pin
+
+        let last = pinElement;
+        this.setup.pins[row][pinIndex].forEach((pindata, index) => {
+            const [text, type] = pindata.split(':');
+            const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
+
+            const label = new PinLabel(text, {
+                backgroundColor: bgcolor,
+                textColor: fgcolor,
+            });
+            label.align(alignment, last, index ? PADDING : PADDING * 3); // add more padding for the first label
+            group.append(label);
+            last = label;
+        });
+
+        return group;
+    }
+
+    /**
+     * Creates a row of pins
+     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
+     * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
+     * @returns {Group} A group containing all pins in the row
+     */
+    createPinRow(row, alignment) {
+        const rowGroup = new Group();
+        const pinCount = this.setup[row].pins;
+
+        for (let pin = 0; pin < pinCount; pin++) {
+            const pinGroup = this.createPinWithLabels(row, pin, alignment);
+            rowGroup.append(pinGroup);
+        }
+
+        return rowGroup;
     }
 
     /**

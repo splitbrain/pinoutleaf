@@ -12,6 +12,9 @@ const commonOptions = {
     minify: true,
     target: ['esnext'],
     format: 'esm',
+    loader: {
+        '.woff2': 'dataurl',
+    }
 }
 
 const cliOptions = {

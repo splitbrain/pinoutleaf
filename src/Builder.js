@@ -181,10 +181,6 @@ export class Builder {
         // Create SVG root
         const svg = new SvgRoot();
 
-        // Create and add the PCB background
-        const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
-        svg.append(pcb);
-
         // this represents the breadboard
         /*
         const breadboard = new Group();
@@ -204,6 +200,10 @@ export class Builder {
         pinLayoutGroup.append(this.createPinRow('top', 'above'));
         pinLayoutGroup.append(this.createPinRow('bottom', 'under'));
         svg.append(pinLayoutGroup);
+
+        // Add the PCB background
+        const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
+        pinLayoutGroup.prepend(pcb);
 
         // Create the title
         const title = new Title(this.setup.title);

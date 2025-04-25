@@ -195,7 +195,25 @@ export class Builder {
      * reverses the order of the top and bottom pins and swaps the front and back images.
      */
     flip() {
+        // Swap left and right pins
+        const tempLeftPins = this.setup.pins.left;
+        this.setup.pins.left = this.setup.pins.right;
+        this.setup.pins.right = tempLeftPins;
 
+        // Reverse top and bottom pins
+        if (this.setup.pins.top) {
+            this.setup.pins.top.reverse();
+        }
+        if (this.setup.pins.bottom) {
+            this.setup.pins.bottom.reverse();
+        }
+
+        // Swap front and back images
+        if (this.setup.image) {
+            const tempFrontImage = this.setup.image.front;
+            this.setup.image.front = this.setup.image.back;
+            this.setup.image.back = tempFrontImage;
+        }
     }
 
     /**

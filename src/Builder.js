@@ -121,7 +121,7 @@ export class Builder {
     }
 
     constructor() {
-
+        this.normalizePinArrays();
     }
 
     /**
@@ -213,6 +213,44 @@ export class Builder {
             this.setup.image.front = this.setup.image.back;
             this.setup.image.back = tempFrontImage;
         }
+    }
+
+    /**
+     * Ensures pin arrays match the defined width and height.
+     */
+    normalizePinArrays() {
+        const { width, height, pins } = this.setup;
+
+        const adjustPinArray = (arrayName, targetLength) => {
+            const currentArray = pins[arrayName];
+            if (!currentArray) {
+                pins[arrayName] = Array(targetLength).fill([]);
+                return;
+            }
+
+            const currentLength = currentArray.length;
+
+            if (currentLength < targetLength) {
+                // Pad the array
+                const needed = targetLength - currentLength;
+                pins[arrayName] = currentArray.concat(Array(needed).fill([]));
+            } else if (currentLength > targetLength) {
+                // Truncate the array
+                console.warn(
+                    `Builder: Pin array '${arrayName}' has ${currentLength} elements, but expected ${targetLength}. 
+                    Truncating excess elements.`
+                );
+                pins[arrayName] = currentArray.slice(0, targetLength);
+            }
+        };
+
+        // Adjust vertical arrays (left, right) based on height
+        adjustPinArray('left', height);
+        adjustPinArray('right', height);
+
+        // Adjust horizontal arrays (top, bottom) based on width
+        adjustPinArray('top', width);
+        adjustPinArray('bottom', width);
     }
 
     /**

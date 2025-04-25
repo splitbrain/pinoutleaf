@@ -43,14 +43,14 @@ export class Builder {
             xoffset: 0,
         },
         top: {
-            pins: 0,
-            xoffset: 0,
-            yoffset: 0,
+            pins: 3,
+            xoffset: 2,
+            yoffset: 1,
         },
         bottom: {
-            pins: 0,
+            pins: 4,
             xoffset: 1,
-            yoffset: 1,
+            yoffset: 0,
         },
 
         // types

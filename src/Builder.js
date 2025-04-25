@@ -1,33 +1,37 @@
 import {SvgRoot} from "./elements/SvgRoot.js";
 import {Group} from "./elements/Group.js";
 import {Circle} from "./elements/Circle.js";
-import {Rect} from "./elements/Rect.js";
 import {PADDING, PINSIZE, PINSPACE} from "./Constants.js";
 import {PinLabel} from "./components/PinLabel.js";
 import {Legend} from "./components/Legend.js";
 import {Title} from "./components/Title.js";
-import {Pcb} from "./components/Pcb.js"; // Import the Pcb component
+import {Pcb} from "./components/Pcb.js";
+import merge from 'lodash.merge'
 
 export class Builder {
 
     setup = {
         // Diagram Title
-        title: "ESP32 C3 Super Mini",
+        title: "My PCB",
 
         // size in pins
-        width: 7,
-        height: 9,
+        width: 5,
+        height: 5,
 
         image: {
             front: {
-                src: 'https://michiel.vanderwulp.be/domotica/Modules/ESP32-C3-SuperMini/ESP32-C3-SuperMini.jpg',
-                top: -270,
-                left: -100,
-                right: -120,
-                bottom: -50,
+                src: '',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
             },
             back: {
-                src: 'https://www.elecbee.com/image/cache/catalog/bg/esp32-c3-development-board-esp32-supermini-wifi-bluetooth-mini-module_1-800x800.jpg',
+                src: '',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
             }
         },
 
@@ -78,49 +82,25 @@ export class Builder {
         // offsets move their respective rows inwards
         offsets: {
             left: 0,
-            top: 2,
-            right: 1,
+            top: 0,
+            right: 0,
             bottom: 0,
         },
 
         // pin label:type, each pin can have multiple labels
         pins: {
-            left: [
-                ['5:gpio', 'A5:analog', 'MISO:spi'],
-                ['6:gpio', 'MOSI:spi', 'SCK:spi'],
-                ['7:gpio', 'SS:spi'],
-                ['8:gpio', 'SDA:i2c'],
-                ['9:gpio', 'SCL:i2c'],
-                ['10:gpio'],
-                ['20:gpio', 'RX:uart'],
-                ['21:gpio', 'TX:uart'],
-            ],
-            right: [
-                [],
-                ['5V:power'],
-                ['GND:gnd'],
-                ['3V3:power'],
-                ['4:gpio', 'A4:analog', 'SCK:spi'],
-                ['3:gpio', 'A3:analog', 'MOSI:spi'],
-                ['2:gpio', 'A2:analog'],
-                ['1:gpio', 'A1:analog'],
-                ['0:gpio', 'A0:analog'],
-            ],
-            top: [
-                [],
-                [],
-                ['GND:gnd', 'A4:analog', 'SCK:spi'],
-                ['5V:power'],
-            ],
-            bottom: [
-                [],
-                ['GND:gnd'],
-                ['5V:power', 'A4:analog', 'SCK:spi'],
-            ],
+            left: [],
+            right: [],
+            top: [],
+            bottom: [],
         }
     }
 
-    constructor() {
+    /**
+     * @param {object} setup The configuration for the PCB diagram.
+     */
+    constructor(setup) {
+        this.setup = merge(this.setup, setup);
         this.normalizePinArrays();
     }
 
@@ -219,7 +199,7 @@ export class Builder {
      * Ensures pin arrays match the defined width and height.
      */
     normalizePinArrays() {
-        const { width, height, pins } = this.setup;
+        const {width, height, pins} = this.setup;
 
         const adjustPinArray = (arrayName, targetLength) => {
             const currentArray = pins[arrayName];
@@ -294,7 +274,7 @@ export class Builder {
         const pinCount = this.setup.pins[row].length;
 
         for (let pin = 0; pin < pinCount; pin++) {
-            if(!this.setup.pins[row][pin].length) continue; // No definition for this pin, skip it
+            if (!this.setup.pins[row][pin].length) continue; // No definition for this pin, skip it
             const pinGroup = this.createPinWithLabels(row, pin, alignment);
             rowGroup.append(pinGroup);
         }

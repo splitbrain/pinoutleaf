@@ -29,28 +29,33 @@ import {Builder} from "./Builder.js";
                 right: 1,
             },
 
+            types: {
+
+            },
+
+
             // pin label:type, each pin can have multiple labels
             pins: {
                 left: [
-                    ['5:gpio', 'A5:analog', 'MISO:spi'],
-                    ['6:gpio', 'MOSI:spi', 'SCK:spi'],
-                    ['7:gpio', 'SS:spi'],
-                    ['8:gpio', 'SDA:i2c'],
-                    ['9:gpio', 'SCL:i2c'],
-                    ['10:gpio'],
-                    ['20:gpio', 'RX:uart'],
-                    ['21:gpio', 'TX:uart'],
+                    ['GPIO5:gpio', 'A5:analog', 'MISO:spi'],
+                    ['GPIO6:gpio', 'MOSI:spi', 'SCK:spi'],
+                    ['GPIO7:gpio', 'SS:spi'],
+                    ['GPIO8:gpio', 'SDA:i2c'],
+                    ['GPIO9:gpio', 'SCL:i2c'],
+                    ['GPIO10:gpio'],
+                    ['GPIO20:gpio', 'RX:uart'],
+                    ['GPIO21:gpio', 'TX:uart'],
                 ],
                 right: [
                     [],
                     ['5V:power'],
                     ['GND:gnd'],
                     ['3V3:power'],
-                    ['4:gpio', 'A4:analog', 'SCK:spi'],
-                    ['3:gpio', 'A3:analog', 'MOSI:spi'],
-                    ['2:gpio', 'A2:analog'],
-                    ['1:gpio', 'A1:analog'],
-                    ['0:gpio', 'A0:analog'],
+                    ['GPIO4:gpio', 'A4:analog', 'SCK:spi'],
+                    ['GPIO3:gpio', 'A3:analog', 'MOSI:spi'],
+                    ['GPIO2:gpio', 'A2:analog'],
+                    ['GPIO1:gpio', 'A1:analog'],
+                    ['GPIO0:gpio', 'A0:analog'],
                 ],
                 top: [
                     [],

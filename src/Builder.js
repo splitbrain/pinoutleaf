@@ -44,12 +44,12 @@ export class Builder {
             },
             gpio: {
                 label: 'GPIO',
-                bgcolor: '#c1fa8d',
-                fgcolor: '#000000',
+                bgcolor: '#8c49ae',
+                fgcolor: '#ffffff',
             },
             power: {
                 label: 'Power',
-                bgcolor: '#ff3333',
+                bgcolor: '#cc322d',
                 fgcolor: '#ffffff',
             },
             gnd: {
@@ -59,23 +59,23 @@ export class Builder {
             },
             i2c: {
                 label: 'I2C',
-                bgcolor: '#e1b4ef',
-                fgcolor: '#000000',
+                bgcolor: '#485377',
+                fgcolor: '#ffffff',
             },
             uart: {
                 label: 'UART',
-                bgcolor: '#669098',
+                bgcolor: '#34CD71',
                 fgcolor: '#ffffff',
             },
             spi: {
                 label: 'SPI',
-                bgcolor: '#9125cd',
+                bgcolor: '#3399DD',
                 fgcolor: '#ffffff',
             },
             analog: {
-                label: 'Analogue',
-                bgcolor: '#f1c863',
-                fgcolor: '#000000',
+                label: 'Analog',
+                bgcolor: '#e38022',
+                fgcolor: '#ffffff',
             },
         },
 

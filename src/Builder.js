@@ -31,28 +31,6 @@ export class Builder {
             }
         },
 
-        // pin rows
-        left: {
-            pins: 8,
-            yoffset: 0,
-            xoffset: 0,
-        },
-        right: {
-            pins: 8,
-            yoffset: 0,
-            xoffset: 0,
-        },
-        top: {
-            pins: 3,
-            xoffset: 2,
-            yoffset: 1,
-        },
-        bottom: {
-            pins: 4,
-            xoffset: 1,
-            yoffset: 0,
-        },
-
         // types
         types: {
             default: {
@@ -97,6 +75,14 @@ export class Builder {
             },
         },
 
+        // offsets move their respective rows inwards
+        offsets: {
+            left: 0,
+            top: 2,
+            right: 1,
+            bottom: 0,
+        },
+
         // pin label:type, each pin can have multiple labels
         pins: {
             left: [
@@ -110,6 +96,7 @@ export class Builder {
                 ['21:gpio', 'TX:uart'],
             ],
             right: [
+                [],
                 ['5V:power'],
                 ['GND:gnd'],
                 ['3V3:power'],
@@ -120,14 +107,21 @@ export class Builder {
                 ['0:gpio', 'A0:analog'],
             ],
             top: [
+                [],
+                [],
                 ['GND:gnd', 'A4:analog', 'SCK:spi'],
                 ['5V:power'],
             ],
             bottom: [
+                [],
                 ['GND:gnd'],
                 ['5V:power', 'A4:analog', 'SCK:spi'],
             ],
         }
+    }
+
+    constructor() {
+
     }
 
     /**
@@ -200,6 +194,11 @@ export class Builder {
         this.setup.pins.left = this.setup.pins.right;
         this.setup.pins.right = tempLeftPins;
 
+        // Swap left and right offsets
+        const tempLeftOffset = this.setup.offsets.left;
+        this.setup.offsets.left = this.setup.offsets.right;
+        this.setup.offsets.right = tempLeftOffset;
+
         // Reverse top and bottom pins
         if (this.setup.pins.top) {
             this.setup.pins.top.reverse();
@@ -229,8 +228,6 @@ export class Builder {
         const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
         group.append(pinElement);
 
-        if(!this.setup.pins[row][pinIndex]) return group; // No labels for this pin
-
         let last = pinElement;
         this.setup.pins[row][pinIndex].forEach((pindata, index) => {
             const [text, type] = pindata.split(':');
@@ -256,9 +253,10 @@ export class Builder {
      */
     createPinRow(row, alignment) {
         const rowGroup = new Group();
-        const pinCount = this.setup[row].pins;
+        const pinCount = this.setup.pins[row].length;
 
         for (let pin = 0; pin < pinCount; pin++) {
+            if(!this.setup.pins[row][pin].length) continue; // No definition for this pin, skip it
             const pinGroup = this.createPinWithLabels(row, pin, alignment);
             rowGroup.append(pinGroup);
         }
@@ -276,23 +274,23 @@ export class Builder {
         switch (row) {
             case 'left':
                 return {
-                    x: this.setup.left.xoffset * PINSPACE,
-                    y: (this.setup.left.yoffset + pin) * PINSPACE
+                    x: this.setup.offsets.left * PINSPACE,
+                    y: pin * PINSPACE
                 };
             case 'right':
                 return {
-                    x: (this.setup.width - 1 - this.setup.right.xoffset) * PINSPACE,
-                    y: (this.setup.right.yoffset + pin) * PINSPACE
+                    x: (this.setup.width - 1 - this.setup.offsets.right) * PINSPACE,
+                    y: pin * PINSPACE
                 };
             case 'top':
                 return {
-                    x: (this.setup.top.xoffset + pin) * PINSPACE,
-                    y: this.setup.top.yoffset * PINSPACE
+                    x: pin * PINSPACE,
+                    y: this.setup.offsets.top * PINSPACE
                 };
             case 'bottom':
                 return {
-                    x: (this.setup.bottom.xoffset + pin) * PINSPACE,
-                    y: (this.setup.height - 1 - this.setup.bottom.yoffset) * PINSPACE
+                    x: pin * PINSPACE,
+                    y: (this.setup.height - 1 - this.setup.offsets.bottom) * PINSPACE
                 };
             default:
                 throw new Error(`Invalid row: ${row}`);

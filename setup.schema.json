@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PCB Diagram Setup",
+  "description": "Configuration schema for the PCB diagram generator",
+  "type": "object",
+  "properties": {
+    "title": {
+      "description": "Diagram Title",
+      "type": "string",
+      "default": "My PCB"
+    },
+    "width": {
+      "description": "Width of the board in number of pins",
+      "type": "integer",
+      "minimum": 1,
+      "default": 5
+    },
+    "height": {
+      "description": "Height of the board in number of pins",
+      "type": "integer",
+      "minimum": 1,
+      "default": 5
+    },
+    "image": {
+      "description": "Configuration for front and back PCB images",
+      "type": "object",
+      "properties": {
+        "front": {
+          "$ref": "#/$defs/imageSide"
+        },
+        "back": {
+          "$ref": "#/$defs/imageSide"
+        }
+      },
+      "additionalProperties": false,
+      "default": {
+        "front": {},
+        "back": {}
+      }
+    },
+    "types": {
+      "description": "Definitions for different pin types (colors, labels)",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9_]+$",
+        "description": "Type name (e.g., 'gpio', 'power')"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/typeDefinition"
+      },
+      "required": [
+        "default"
+      ],
+      "default": {
+        "default": { "label": "PIN", "bgcolor": "#ffffff", "fgcolor": "#000000" }
+        // Add other default types if desired
+      }
+    },
+    "offsets": {
+      "description": "Offsets to move pin rows inwards",
+      "type": "object",
+      "properties": {
+        "left": { "type": "integer", "minimum": 0, "default": 0 },
+        "top": { "type": "integer", "minimum": 0, "default": 0 },
+        "right": { "type": "integer", "minimum": 0, "default": 0 },
+        "bottom": { "type": "integer", "minimum": 0, "default": 0 }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "pins": {
+      "description": "Pin definitions for each side",
+      "type": "object",
+      "properties": {
+        "left": { "$ref": "#/$defs/pinRow" },
+        "right": { "$ref": "#/$defs/pinRow" },
+        "top": { "$ref": "#/$defs/pinRow" },
+        "bottom": { "$ref": "#/$defs/pinRow" }
+      },
+      "required": [
+        "left",
+        "right",
+        "top",
+        "bottom"
+      ],
+      "additionalProperties": false,
+      "default": {
+        "left": [],
+        "right": [],
+        "top": [],
+        "bottom": []
+      }
+    }
+  },
+  "required": [
+    "width",
+    "height",
+    "pins"
+    // title, types, image, offsets have defaults
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "imageSide": {
+      "description": "Configuration for a single side image",
+      "type": "object",
+      "properties": {
+        "src": {
+          "description": "URL or path to the image file",
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "top": {
+          "description": "Vertical offset from the top edge",
+          "type": "number"
+        },
+        "left": {
+          "description": "Horizontal offset from the left edge",
+          "type": "number"
+        },
+        "right": {
+          "description": "Horizontal offset from the right edge",
+          "type": "number"
+        },
+        "bottom": {
+          "description": "Vertical offset from the bottom edge",
+          "type": "number"
+        },
+        "opacity": {
+          "description": "Image opacity",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5
+        },
+        "preserveAspectRatio": {
+          "description": "SVG preserveAspectRatio attribute value",
+          "type": "string",
+          "default": "xMidYMid slice"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "typeDefinition": {
+      "description": "Definition of a pin type",
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "Label text for the legend",
+          "type": "string"
+        },
+        "bgcolor": {
+          "description": "Background color (hex format)",
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "fgcolor": {
+          "description": "Foreground (text) color (hex format)",
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": [
+        "label",
+        "bgcolor",
+        "fgcolor"
+      ],
+      "additionalProperties": false
+    },
+    "pinRow": {
+      "description": "An array representing pins along one side",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/pinLabels"
+      }
+    },
+    "pinLabels": {
+      "description": "An array of labels for a single pin position",
+      "type": "array",
+      "items": {
+        "description": "Pin label, optionally with type (e.g., 'GPIO1' or 'SDA:i2c')",
+        "type": "string",
+        "pattern": "^[^:]+(:[a-zA-Z0-9_]+)?$"
+      }
+    }
+  }
+}

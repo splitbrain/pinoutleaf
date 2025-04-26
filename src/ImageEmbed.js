@@ -98,13 +98,13 @@ export class ImageEmbed {
             if (!response.ok) {
                 throw new Error(`Failed to fetch data URI from service for '${source}': ${response.status} ${response.statusText}`);
             }
-            // Assuming the service returns JSON like { "dataUri": "data:..." }
-            const data = await response.json();
-            if (!data || typeof data.dataUri !== 'string' || !data.dataUri.startsWith('data:')) {
-                 throw new Error(`Invalid response from embed service for source "${source}"`);
+            // Assuming the service returns the data URI as plain text
+            const dataUri = await response.text();
+            if (typeof dataUri !== 'string' || !dataUri.startsWith('data:')) {
+                 throw new Error(`Invalid response from embed service for source "${source}". Expected data URI, got: ${dataUri.substring(0, 100)}...`);
             }
-            console.debug(`Received data URI for ${source} from service (length: ${data.dataUri.length})`);
-            return data.dataUri;
+            console.debug(`Received data URI for ${source} from service (length: ${dataUri.length})`);
+            return dataUri;
         } catch (error) {
             console.error(`Error embedding image via browser service for source "${source}":`, error.message);
             // Re-throw to allow caller to handle

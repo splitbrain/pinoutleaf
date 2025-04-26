@@ -107,24 +107,40 @@ export class ImageEmbed {
      * @returns {Promise<object>} A promise that resolves with the modified setup object.
      */
     async embedImages(setup) {
-        const imageConfigs = [
-            setup?.image?.front,
-            setup?.image?.back
-        ];
-
-        for (const config of imageConfigs) {
-            if (config && config.src) {
-                const originalSrc = config.src;
-                try {
-                    console.debug(`Attempting to embed image: ${originalSrc}`);
-                    config.src = await this.embed(originalSrc);
-                    console.debug(`Successfully embedded image: ${originalSrc}`);
-                } catch (error) {
-                    console.warn(`Failed to embed image "${originalSrc}": ${error.message}. Keeping original source.`);
-                    // Keep original config.src
-                }
-            }
+        const imageConfigsToProcess = [];
+        if (setup?.image?.front?.src) {
+            imageConfigsToProcess.push({ config: setup.image.front, originalSrc: setup.image.front.src });
         }
+        if (setup?.image?.back?.src) {
+            imageConfigsToProcess.push({ config: setup.image.back, originalSrc: setup.image.back.src });
+        }
+
+        if (imageConfigsToProcess.length === 0) {
+            return setup; // No images to process
+        }
+
+        // Create an array of promises for embedding each image
+        const embedPromises = imageConfigsToProcess.map(item => {
+            console.debug(`Attempting to embed image: ${item.originalSrc}`);
+            return this.embed(item.originalSrc);
+        });
+
+        // Wait for all embedding attempts to settle (either succeed or fail)
+        const results = await Promise.allSettled(embedPromises);
+
+        // Process the results
+        results.forEach((result, index) => {
+            const item = imageConfigsToProcess[index];
+            if (result.status === 'fulfilled') {
+                item.config.src = result.value; // Update src with the data URI
+                console.debug(`Successfully embedded image: ${item.originalSrc}`);
+            } else {
+                // Status is 'rejected'
+                console.warn(`Failed to embed image "${item.originalSrc}": ${result.reason?.message || result.reason}. Keeping original source.`);
+                // Keep original item.config.src (no change needed)
+            }
+        });
+
         return setup; // Return the modified setup object
     }
 }

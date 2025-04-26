@@ -4,7 +4,7 @@ import { mkdir } from 'fs/promises';
 const watch = process.argv.includes('--watch');
 const serve = process.argv.includes('--serve');
 
-await mkdir('./dist', { recursive: true });
+await mkdir('./public/dist', { recursive: true });
 
 const commonOptions = {
     bundle: true,
@@ -21,7 +21,7 @@ const commonOptions = {
 const cliOptions = {
     ...commonOptions,
     entryPoints: ['./src/cli.js'],
-    outfile: './dist/cli.js',
+    outfile: './public/dist/cli.js',
     platform: 'node',
     external: ['svgdom', 'fs', 'yaml'],
     banner: {
@@ -31,9 +31,10 @@ const cliOptions = {
 const browserOptions = {
     ...commonOptions,
     entryPoints: ['./src/web.js'],
-    outfile: './dist/web.js',
+    outfile: './public/dist/web.js',
     platform: 'browser',
     format: 'esm',
+    external: ['fs', 'path'], // ignore node modules (we import them dynamically on node only)
     define: {
         global: 'window'
     },
@@ -49,7 +50,7 @@ async function build() {
             // Also watch for changes
             await Promise.all([
                 browserCtx.serve({
-                    servedir: './dist',
+                    servedir: './public',
                     host: 'localhost',
                     port: 8000,
                 }),

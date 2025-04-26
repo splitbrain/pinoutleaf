@@ -1,5 +1,5 @@
 .aider*
-dist
-!dist/index.html
 node_modules
-pinouts/*.svg
+
+public/dist
+public/pinouts/*.svg

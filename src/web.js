@@ -5,8 +5,8 @@ import {Editor} from "./Editor.js";
 (async function() {
 
     const editor = new Editor(
-        document.querySelector('.editor'),
-        document.querySelector('.output')
+        document.getElementById('editor'),
+        document.getElementById('output')
     );
 
 

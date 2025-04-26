@@ -16,6 +16,13 @@ export class ImageEmbed {
     static SERVICE = 'https://imgdataurl.splitbrain.workers.dev/';
 
     /**
+     * @param {string} base The relative base to look for local images in
+     */
+    constructor(base = '') {
+        this.base = base;
+    }
+
+    /**
      * Processes a setup object, attempting to embed images specified in
      * `setup.image.front.src` and `setup.image.back.src`.
      *
@@ -30,10 +37,10 @@ export class ImageEmbed {
         const imageConfigsToProcess = [];
         // Collect image sources to process, storing references to the config objects
         if (setup?.image?.front?.src) {
-            imageConfigsToProcess.push({ config: setup.image.front, originalSrc: setup.image.front.src });
+            imageConfigsToProcess.push({config: setup.image.front, originalSrc: setup.image.front.src});
         }
         if (setup?.image?.back?.src) {
-            imageConfigsToProcess.push({ config: setup.image.back, originalSrc: setup.image.back.src });
+            imageConfigsToProcess.push({config: setup.image.back, originalSrc: setup.image.back.src});
         }
 
         if (imageConfigsToProcess.length === 0) {
@@ -110,6 +117,8 @@ export class ImageEmbed {
             buffer = Buffer.from(await response.arrayBuffer());
             mimeType = response.headers.get('content-type')?.split(';')[0].toLowerCase();
         } else {
+            source = this.base ? path.join(this.base, source) : source;
+
             buffer = await fs.readFile(source);
             const extension = path.extname(source).toLowerCase();
             if (extension === '.jpg' || extension === '.jpeg') {
@@ -141,6 +150,16 @@ export class ImageEmbed {
      * @private
      */
     async embedBrowser(source) {
+
+        // this is not a URL, so we assume it to be one of our own, locally served files
+        if (!source.match(/^https?:\/\//)) {
+            if (this.base) {
+                source = `${this.base}/${source}`;
+            }
+            source = new URL(source, window.location.href).toString();
+            if (source.match(/^http:\/\/(localhost|127.0.0.1)/)) return source; // no local embeds
+        }
+
         const embedServiceUrl = `${ImageEmbed.SERVICE}?url=${encodeURIComponent(source)}`;
         const response = await fetch(embedServiceUrl);
         if (!response.ok) {

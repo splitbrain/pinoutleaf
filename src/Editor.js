@@ -78,7 +78,7 @@ export class Editor {
     }
 
     async onUpdate(setup) {
-        const embed = new ImageEmbed();
+        const embed = new ImageEmbed('pinouts');
         setup = await embed.embedImages(setup);
 
         const builder = new Builder(setup);

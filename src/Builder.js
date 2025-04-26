@@ -45,7 +45,7 @@ export class Builder {
             },
             gpio: {
                 label: 'GPIO',
-                bgcolor: '#8c49ae',
+                bgcolor: '#79bc3c',
                 fgcolor: '#ffffff',
             },
             power: {
@@ -60,17 +60,17 @@ export class Builder {
             },
             i2c: {
                 label: 'I2C',
-                bgcolor: '#485377',
+                bgcolor: '#41b28c',
                 fgcolor: '#ffffff',
             },
             uart: {
                 label: 'UART',
-                bgcolor: '#34CD71',
+                bgcolor: '#637181',
                 fgcolor: '#ffffff',
             },
             spi: {
                 label: 'SPI',
-                bgcolor: '#3399DD',
+                bgcolor: '#775ee8',
                 fgcolor: '#ffffff',
             },
             analog: {

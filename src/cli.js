@@ -2,7 +2,7 @@ import {createWindow} from "svgdom";
 import {Builder} from "./Builder.js";
 import Yaml from 'yaml';
 import { readdir, readFile, stat, writeFile } from 'fs/promises';
-import {join} from 'path';
+import {join, dirname} from 'path';
 import {ImageEmbed} from "./ImageEmbed.js";
 
 /**
@@ -66,7 +66,7 @@ async function processFile(file) {
         throw new Error(`Unsupported file type: ${file}`);
     }
 
-    const embed = new ImageEmbed();
+    const embed = new ImageEmbed(dirname(file));
     setup = await embed.embedImages(setup);
 
     const outputBase = file.replace(/\.(yaml|json)$/, '');

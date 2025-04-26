@@ -36,7 +36,7 @@ The pins can be described by a simple YAML based description and the tool automa
 
 ### Web Editor
 
-1. Go to FIXME
+1. Go to https://splitbrain.github.io/pinoutleaf/ (replace placeholders)
 2. Edit the YAML configuration in the editor.
 3. The SVG diagrams will update automatically.
 4. Click the images to download them 
@@ -61,11 +61,11 @@ Check the [pinouts](public/pinouts) directory for boards that have already been 
 ```bash
 npm install
 ```
-2. Build the project (for web editor and CLI):
+3. Build the project (for web editor and CLI):
    ```bash
    node build.js
    ```
-3. Run the CLI tool with configuration files or directories as arguments:
+4. Run the CLI tool with configuration files or directories as arguments:
    ```bash
    node public/dist/cli.js path/to/your/config.yaml
    ```

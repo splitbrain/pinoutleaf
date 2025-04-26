@@ -7,6 +7,7 @@ import {ImageEmbed} from "./ImageEmbed.js";
 
 export class Editor {
 
+    STORAGE_KEY = 'pcb-diagram-yaml';
 
     constructor(editor, output) {
         this.output = output;

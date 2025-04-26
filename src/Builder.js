@@ -274,6 +274,7 @@ export class Builder {
         const pinCount = this.setup.pins[row].length;
 
         for (let pin = 0; pin < pinCount; pin++) {
+            if (!this.setup.pins[row][pin]) continue; // pin is null
             if (!this.setup.pins[row][pin].length) continue; // No definition for this pin, skip it
             const pinGroup = this.createPinWithLabels(row, pin, alignment);
             rowGroup.append(pinGroup);

@@ -41,6 +41,7 @@ export class Legend extends Group {
 
         for (const rowKey in pinsData) {
             pinsData[rowKey].forEach(pinLabels => {
+                if (!pinLabels) return; // pin is null
                 pinLabels.forEach(labelData => {
                     const parts = labelData.split(':');
                     const typeName = (parts.length > 1 && allTypes[parts[1]]) ? parts[1] : 'default';

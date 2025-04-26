@@ -9,7 +9,7 @@ export class Text extends BaseElement {
       ...attrs,
       // align on top left corner
       'dominant-baseline': 'hanging',
-      'font-family': 'Roboto Mono, monospace',
+      'font-family': 'Roboto Mono',
       'font-size': FONTSIZE,
     });
     this.text = text;

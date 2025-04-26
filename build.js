@@ -23,7 +23,7 @@ const cliOptions = {
     entryPoints: ['./src/cli.js'],
     outfile: './dist/cli.js',
     platform: 'node',
-    external: ['svgdom', 'fs', 'hjson'],
+    external: ['svgdom', 'fs', 'yaml'],
     banner: {
         js: '#!/usr/bin/env node',
     },

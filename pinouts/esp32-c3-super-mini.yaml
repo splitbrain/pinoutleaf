@@ -3,13 +3,13 @@ width: 7
 height: 9
 image:
   front:
-    src: "https://michiel.vanderwulp.be/domotica/Modules/ESP32-C3-SuperMini/ESP32-C3-SuperMini.jpg"
+    src: "esp32-c3-super-mini.front.png"
     top: -270
     left: -100
     right: -120
     bottom: -50
   back:
-    src: "https://www.elecbee.com/image/cache/catalog/bg/esp32-c3-development-board-esp32-supermini-wifi-bluetooth-mini-module_1-800x800.jpg"
+    src: "esp32-c3-super-mini.back.png"
 offsets:
   top: 2
   right: 1

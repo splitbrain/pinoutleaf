@@ -7,6 +7,7 @@ import {Legend} from "./components/Legend.js";
 import {Title} from "./components/Title.js";
 import {Pcb} from "./components/Pcb.js";
 import merge from 'lodash.merge';
+import {RootGroup} from "./components/RootGroup.js";
 
 export class Builder {
 
@@ -112,17 +113,8 @@ export class Builder {
     build() {
         // Create SVG root
         const svg = new SvgRoot();
-
-        // this represents the breadboard
-        /*
-        const breadboard = new Group();
-        for(let x = 0; x < this.setup.width; x++) {
-            for(let y = 0; y < this.setup.height; y++) {
-                breadboard.append(new Circle(x * PINSPACE, y * PINSPACE, 100, '#eeeeee'));
-            }
-        }
-        svg.append(breadboard);
-       */
+        const root = new RootGroup();
+        svg.append(root);
 
 
         // Create pin rows
@@ -131,7 +123,7 @@ export class Builder {
         pinLayoutGroup.append(this.createPinRow('right', 'rightof'));
         pinLayoutGroup.append(this.createPinRow('top', 'above'));
         pinLayoutGroup.append(this.createPinRow('bottom', 'under'));
-        svg.append(pinLayoutGroup);
+        root.append(pinLayoutGroup);
 
         // Add the PCB background
         const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
@@ -139,11 +131,11 @@ export class Builder {
 
         // Create the title
         const title = new Title(this.setup.title);
-        svg.append(title)
+        root.append(title)
 
         // Create the legend
         const legend = new Legend(this.setup.types, this.setup.pins);
-        svg.append(legend);
+        root.append(legend);
 
 
         // Get bounding box of the main pin layout
@@ -158,6 +150,7 @@ export class Builder {
         legend.setTranslate(pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 3, pinLayoutBBox.y);
 
         // Update SVG bounds to include everything
+        root.reframe();
         svg.getBoundingBox();
         return svg;
     }

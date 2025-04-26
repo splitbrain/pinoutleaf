@@ -14,14 +14,6 @@ export class Defs extends BaseElement {
         font-family: 'Roboto Mono';
         src: url('${fontData}') format('woff2');
       }
-
-      @media screen {
-        svg {
-          /* scale up approximately 3x for screen (96dpi to 300dpi) */
-          transform: scale(3.125);
-          transform-origin: 0 0;
-        }
-      }
     `;
 
     this.append(style);

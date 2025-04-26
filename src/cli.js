@@ -1,7 +1,7 @@
 import {createWindow} from "svgdom";
 import {Builder} from "./Builder.js";
 import Yaml from 'yaml';
-import {readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
+import { readdir, readFile, stat, writeFile } from 'fs/promises'; // Use fs/promises
 import {join} from 'path';
 import {ImageEmbed} from "./ImageEmbed.js";
 
@@ -15,17 +15,23 @@ function printHelp() {
 
 async function processDir(dir) {
     let errors = 0;
-    const files = readdirSync(dir);
-    for (const file of files) {
-        const filePath = join(dir, file);
-        // Check if it's a file and has the correct extension
-        try {
-            const stats = statSync(filePath);
-            if (stats.isFile() && (file.endsWith('.json') || file.endsWith('.yaml'))) {
-                await processFile(filePath);
+    try {
+        const files = await readdir(dir); // Use await readdir
+        for (const file of files) {
+            const filePath = join(dir, file);
+            // Check if it's a file and has the correct extension
+            try {
+                const stats = await stat(filePath); // Use await stat
+                if (stats.isFile() && (file.endsWith('.json') || file.endsWith('.yaml'))) {
+                    await processFile(filePath); // Already awaited
+                }
+            } catch (statError) {
+                console.error(`Failed getting stats for '${filePath}': ${statError.message}`);
+                errors++;
             }
-        } catch (error) {
-            console.error(`Failed processing '${filePath}': ${statError.message}`);
+        }
+    } catch (readDirError) {
+        console.error(`Failed reading directory '${dir}': ${readDirError.message}`);
             errors++;
         }
     }
@@ -33,7 +39,7 @@ async function processDir(dir) {
 }
 
 async function processFile(file) {
-    const data = readFileSync(file, 'utf8');
+    const data = await readFile(file, 'utf8'); // Use await readFile
 
     let setup;
     if (file.endsWith('.yaml')) {
@@ -54,10 +60,16 @@ async function processFile(file) {
     const outputBase = file.replace(/\.(yaml|json)$/, '');
     const builder = new Builder(setup);
     const window = createWindow();
-    writeFileSync(outputBase + '.front.svg', builder.build().render(window.document).outerHTML, 'utf8');
+
+    // Write front SVG
+    const frontSvgContent = builder.build().render(window.document).outerHTML;
+    await writeFile(outputBase + '.front.svg', frontSvgContent, 'utf8'); // Use await writeFile
     console.info(outputBase + '.front.svg written');
+
+    // Flip and write back SVG
     builder.flip();
-    writeFileSync(outputBase + '.back.svg', builder.build().render(window.document).outerHTML, 'utf8');
+    const backSvgContent = builder.build().render(window.document).outerHTML;
+    await writeFile(outputBase + '.back.svg', backSvgContent, 'utf8'); // Use await writeFile
     console.info(outputBase + '.back.svg written');
 }
 
@@ -80,10 +92,10 @@ async function main() {
 
     for (const arg of args) {
         try {
-            const stats = statSync(arg);
+            const stats = await stat(arg); // Use await stat
             if (stats.isFile()) {
                 // Directly process files specified as arguments
-                await processFile(arg);
+                await processFile(arg); // Already awaited
             } else if (stats.isDirectory()) {
                 // Process directories specified as arguments
                 errors += await processDir(arg);

@@ -3,6 +3,7 @@ import {Builder} from "./Builder.js";
 import Yaml from 'yaml';
 import {readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {join} from 'path';
+import {ImageEmbed} from "./ImageEmbed.js";
 
 function printHelp() {
     console.log(`Usage: node ${process.argv[1]} [options] <file/dir> ...`);
@@ -12,26 +13,26 @@ function printHelp() {
 }
 
 
-function processDir(dir) {
+async function processDir(dir) {
     let errors = 0;
     const files = readdirSync(dir);
-    files.forEach(file => {
+    for (const file of files) {
         const filePath = join(dir, file);
         // Check if it's a file and has the correct extension
         try {
             const stats = statSync(filePath);
             if (stats.isFile() && (file.endsWith('.json') || file.endsWith('.yaml'))) {
-                processFile(filePath);
+                await processFile(filePath);
             }
         } catch (error) {
             console.error(`Failed processing '${filePath}': ${statError.message}`);
             errors++;
         }
-    });
+    }
     return errors;
 }
 
-function processFile(file) {
+async function processFile(file) {
     const data = readFileSync(file, 'utf8');
 
     let setup;
@@ -43,11 +44,16 @@ function processFile(file) {
         throw new Error(`Unsupported file type: ${file}`);
     }
 
-    const outputBase = file.replace(/\.(yaml|json)$/, '');
+    // inline images
+    const embed = new ImageEmbed();
+    setup = await embed.embedImages(setup);
 
+    console.log(setup);
+
+    // create the SVGs
+    const outputBase = file.replace(/\.(yaml|json)$/, '');
     const builder = new Builder(setup);
     const window = createWindow();
-
     writeFileSync(outputBase + '.front.svg', builder.build().render(window.document).outerHTML, 'utf8');
     console.info(outputBase + '.front.svg written');
     builder.flip();
@@ -55,7 +61,7 @@ function processFile(file) {
     console.info(outputBase + '.back.svg written');
 }
 
-function main() {
+async function main() {
     // Basic argument parsing
     const args = process.argv.slice(2); // Skip node executable and script path
 
@@ -72,15 +78,15 @@ function main() {
 
     let errors = 0;
 
-    args.forEach(arg => {
+    for (const arg of args) {
         try {
             const stats = statSync(arg);
             if (stats.isFile()) {
                 // Directly process files specified as arguments
-                processFile(arg);
+                await processFile(arg);
             } else if (stats.isDirectory()) {
                 // Process directories specified as arguments
-                errors += processDir(arg);
+                errors += await processDir(arg);
             } else {
                 console.error(`Error: '${arg}' is not a file or directory.`);
                 errors++;
@@ -94,7 +100,7 @@ function main() {
             }
             errors++;
         }
-    });
+    }
 
     process.exit(errors);
 }

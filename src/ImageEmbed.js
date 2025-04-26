@@ -109,10 +109,10 @@ export class ImageEmbed {
     async embedImages(setup) {
         const imageConfigsToProcess = [];
         if (setup?.image?.front?.src) {
-            imageConfigsToProcess.push({ config: setup.image.front, originalSrc: setup.image.front.src });
+            imageConfigsToProcess.push({config: setup.image.front, originalSrc: setup.image.front.src});
         }
         if (setup?.image?.back?.src) {
-            imageConfigsToProcess.push({ config: setup.image.back, originalSrc: setup.image.back.src });
+            imageConfigsToProcess.push({config: setup.image.back, originalSrc: setup.image.back.src});
         }
 
         if (imageConfigsToProcess.length === 0) {

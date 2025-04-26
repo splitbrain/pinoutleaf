@@ -59,10 +59,18 @@ export class Editor {
                 const yamlContent = await response.text();
                 this.ace.setValue(yamlContent, -1); // -1 moves cursor to the start
                 console.log(`Loaded content from: ${loadUrl}`);
-                // Optionally clear localStorage if loaded from URL to avoid conflict?
-                // localStorage.removeItem(this.STORAGE_KEY);
+
+                // Remove the 'load' parameter from the URL without reloading
+                const currentUrlParams = new URLSearchParams(window.location.search);
+                currentUrlParams.delete('load');
+                const newRelativePathQuery = window.location.pathname + (currentUrlParams.toString() ? '?' + currentUrlParams.toString() : '');
+                window.history.replaceState({ path: newRelativePathQuery }, '', newRelativePathQuery);
             } catch (error) {
                 console.error('Failed to load content from URL:', loadUrl, error);
+                // Display error to the user in the output div and editor
+                const errorMessage = `# Failed to load content from: ${loadUrl}\n# Error: ${error.message}`;
+                this.output.innerHTML = `<div class="error">Failed to load content from <a href="${loadUrl}" target="_blank">${loadUrl}</a>: ${error.message}</div>`;
+                this.ace.setValue(errorMessage, -1);
             }
         } else {
             // Load initial content from localStorage if no loadUrl

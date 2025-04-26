@@ -27,21 +27,50 @@ export class Editor {
             tabSize: 2
         });
 
-        // Load initial content from localStorage
-        const savedYaml = localStorage.getItem(this.STORAGE_KEY);
-        if (savedYaml) {
-            this.ace.setValue(savedYaml, -1); // -1 moves cursor to the start
-        } else {
-            // Optional: Set a default value if nothing is saved
-            // this.ace.setValue("title: My PCB\nwidth: 5\nheight: 5\npins:\n  left: []\n  right: []\n  top: []\n  bottom: []", -1);
-        }
-
-        // register change handler
-        this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
-        this.onChange(); // Trigger initial processing
+        // Defer content loading and event binding
+        this.initializeEditor();
 
         // register download handler
         this.output.addEventListener('click', this.onDownloadClick);
+    }
+
+    async initializeEditor() {
+        // Load content first
+        await this.loadInitialContent();
+
+        // Then register change handler and trigger initial processing
+        this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
+        // Check if editor has content before triggering initial processing
+        if (this.ace.getValue()) {
+             this.onChange(); // Trigger initial processing only if content loaded
+        }
+    }
+
+    async loadInitialContent() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadUrl = urlParams.get('load');
+
+        if (loadUrl) {
+            try {
+                const response = await fetch(loadUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const yamlContent = await response.text();
+                this.ace.setValue(yamlContent, -1); // -1 moves cursor to the start
+                console.log(`Loaded content from: ${loadUrl}`);
+                // Optionally clear localStorage if loaded from URL to avoid conflict?
+                // localStorage.removeItem(this.STORAGE_KEY);
+            } catch (error) {
+                console.error('Failed to load content from URL:', loadUrl, error);
+            }
+        } else {
+            // Load initial content from localStorage if no loadUrl
+            const savedYaml = localStorage.getItem(this.STORAGE_KEY);
+            if (savedYaml) {
+                this.ace.setValue(savedYaml, -1);
+            }
+        }
     }
 
     debounce(func, wait) {

@@ -1,19 +1,24 @@
 import {createWindow} from "svgdom";
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
 import {Builder} from "./Builder.js";
 
+function printHelp() {
+    console.log(`Usage: node ${process.argv[1]} [options]`);
+    console.log("Options:");
+    console.log("  -h, --help    Display this help message.");
+    console.log("\nGenerates an SVG representation based on configuration.");
+    console.log("copyright 2025");
+}
+
 function main() {
-    const argv = yargs(hideBin(process.argv))
-        .usage('Usage: $0 [options]')
-        .help('h')
-        .alias('h', 'help')
-        .epilog('copyright 2025')
-        .argv;
+    // Basic argument parsing
+    const args = process.argv.slice(2); // Skip node executable and script path
 
-    // yargs handles the help flag automatically,
-    // so we only proceed if help wasn't requested.
+    if (args.includes('-h') || args.includes('--help')) {
+        printHelp();
+        process.exit(0); // Exit successfully after showing help
+    }
 
+    // Proceed with SVG generation if no help flag
     const window = createWindow();
     const builder = new Builder();
 

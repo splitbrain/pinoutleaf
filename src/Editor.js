@@ -26,7 +26,17 @@ export class Editor {
             tabSize: 2
         });
 
+        // Load initial content from localStorage
+        const savedYaml = localStorage.getItem(this.STORAGE_KEY);
+        if (savedYaml) {
+            this.ace.setValue(savedYaml, -1); // -1 moves cursor to the start
+        } else {
+            // Optional: Set a default value if nothing is saved
+            // this.ace.setValue("title: My PCB\nwidth: 5\nheight: 5\npins:\n  left: []\n  right: []\n  top: []\n  bottom: []", -1);
+        }
+
         this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
+        this.onChange(); // Trigger initial processing
     }
 
     debounce(func, wait) {
@@ -43,9 +53,12 @@ export class Editor {
             const parsed = Yaml.parse(yaml, {
                 prettyErrors: true,
             });
+            // Save valid YAML to localStorage
+            localStorage.setItem(this.STORAGE_KEY, yaml);
             this.onUpdate(parsed);
             this.clearErrors();
         } catch (e) {
+            // Don't save invalid YAML
             if (e.linePos) {
                 this.showError(
                     e.linePos[0].line - 1,

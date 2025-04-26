@@ -34,7 +34,6 @@ const browserOptions = {
     outfile: './dist/web.js',
     platform: 'browser',
     format: 'esm',
-    external: ['fs', 'path'], // Mark Node.js built-ins as external for browser
     define: {
         global: 'window'
     },

@@ -1,7 +1,7 @@
 import {createWindow} from "svgdom";
 import {Builder} from "./Builder.js";
 import Yaml from 'yaml';
-import { readdir, readFile, stat, writeFile } from 'fs/promises'; // Use fs/promises
+import { readdir, readFile, stat, writeFile } from 'fs/promises';
 import {join} from 'path';
 import {ImageEmbed} from "./ImageEmbed.js";
 

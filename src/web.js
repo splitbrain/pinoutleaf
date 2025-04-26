@@ -1,8 +1,16 @@
 import {Builder} from "./Builder.js";
 import {ImageEmbed} from "./ImageEmbed.js";
+import {Editor} from "./Editor.js";
 
 (async function() {
 
+    const editor = new Editor(
+        document.querySelector('.editor'),
+        document.querySelector('.output')
+    );
+
+
+    /*
     let setup = {
         // Diagram Title
         title: "ESP32 C3 Super Mini",
@@ -82,4 +90,5 @@ import {ImageEmbed} from "./ImageEmbed.js";
     const el = svg.render(window.document);
 
     window.document.body.appendChild(el);
+     */
 })();

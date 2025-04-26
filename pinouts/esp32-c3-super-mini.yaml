@@ -1,0 +1,43 @@
+title: "ESP32 C3 Super Mini"
+
+# dimensions counted in pins
+width: 7
+height: 8
+
+# images can be URLs, use adjustments to fit the pins
+image:
+  front:
+    src: "esp32-c3-super-mini.front.png"
+    top: -200
+    left: 50
+    right: 50
+    bottom: -190
+  back:
+    src: "esp32-c3-super-mini.back.png"
+    top: -150
+    left: 50
+    right: 50
+    bottom: -170
+
+# Define the pins (label:type), use empty entries when offsets are needed
+pins:
+  left:
+    - [ "GPIO5:gpio", "A5:analog", "MISO:spi" ]
+    - [ "GPIO6:gpio", "MOSI:spi" ]
+    - [ "GPIO7:gpio", "SS:spi" ]
+    - [ "GPIO8:gpio", "SDA:i2c" ]
+    - [ "GPIO9:gpio", "SCL:i2c" ]
+    - [ "GPIO10:gpio" ]
+    - [ "GPIO20:gpio", "RX:uart" ]
+    - [ "GPIO21:gpio", "TX:uart" ]
+  right:
+    - [ "5V:power" ]
+    - [ "GND:gnd" ]
+    - [ "3V3:power" ]
+    - [ "GPIO4:gpio", "A4:analog", "SCK:spi" ]
+    - [ "GPIO3:gpio", "A3:analog" ]
+    - [ "GPIO2:gpio", "A2:analog" ]
+    - [ "GPIO1:gpio", "A1:analog" ]
+    - [ "GPIO0:gpio", "A0:analog" ]
+
+# For custom types, top and bottom rows, row offsets, etc. read the docs

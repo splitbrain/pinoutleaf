@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <title>Pinout Leaf Editor</title>
+    <script type="module" src="dist/web.js"></script>
+    <script>
+        new EventSource('/esbuild').addEventListener('change', () => location.reload());
+    </script>
+
+    <link type="text/css" rel="stylesheet" href="web.css">
+    <link type="text/css" rel="stylesheet" href="editor.css">
+
+</head>
+<body>
+
+<div class="editor">
+    <div class="panel panel-editor">
+        <div id="editor"></div>
+        <p>
+            Example:
+            <a href="?load=pinouts/esp32-c3-super-mini.yaml">ESP32-C3 Super Mini</a>
+        </p>
+
+        <p>
+            When you create the pinout for a new commonly available PCB please submit a pull request or issue, so
+            it can be added to the list of available pinouts.
+        </p>
+    </div>
+    <div class="panel panel-output">
+        <div id="output"></div>
+
+        <p>Click images to download.</p>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,7 +1,7 @@
-import {createWindow} from "svgdom";
-import {Builder} from "./Builder.js";
+import { createWindow } from "svgdom";
+import { Builder } from "./Builder.js";
 import Hjson from 'hjson';
-import { readFileSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 
 function printHelp() {
     console.log(`Usage: node ${process.argv[1]} [options]`);
@@ -35,6 +35,36 @@ function main() {
         process.exit(0); // Exit successfully after showing help
     }
 
+    if (args.length === 0) {
+        console.error("Error: No input files or directories specified.");
+        printHelp();
+        process.exit(1);
+    }
+
+    let errors = 0;
+
+    args.forEach(arg => {
+        try {
+            const stats = statSync(arg);
+            if (stats.isFile()) {
+                processFile(arg);
+            } else if (stats.isDirectory()) {
+                processDir(arg);
+            } else {
+                console.error(`Error: '${arg}' is not a file or directory.`);
+                errors++;
+            }
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.error(`Error: Path not found '${arg}'`);
+            } else {
+                console.error(`Error processing '${arg}': ${error.message}`);
+            }
+            errors++;
+        }
+    });
+
+    process.exit(errors);
 }
 
 main();

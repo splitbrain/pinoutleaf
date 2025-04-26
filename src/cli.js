@@ -53,8 +53,6 @@ async function processFile(file) {
     const embed = new ImageEmbed();
     setup = await embed.embedImages(setup);
 
-    console.log(setup);
-
     // create the SVGs
     const outputBase = file.replace(/\.(yaml|json)$/, '');
     const builder = new Builder(setup);

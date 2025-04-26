@@ -26,6 +26,10 @@ The pins can be described by a simple YAML based description and the tool automa
 * **Front & Back Views:**
   * Automatically generates diagrams for both the front and back sides of the PCB.
 
+## Screenshot
+
+![Screenshot](screenshot.png)
+
 ## Limits
 
 * Only four rows of pins are supported

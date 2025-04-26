@@ -93,6 +93,8 @@ export class Editor {
             const savedYaml = localStorage.getItem(this.STORAGE_KEY);
             if (savedYaml) {
                 this.ace.setValue(savedYaml, -1);
+            } else {
+                this.ace.setValue("# Hi!\n# New here? Load an example from below!", -1);
             }
         }
     }

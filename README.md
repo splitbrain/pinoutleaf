@@ -36,7 +36,7 @@ The pins can be described by a simple YAML based description and the tool automa
 
 ### Web Editor
 
-1. Go to https://splitbrain.github.io/pinoutleaf/ (replace placeholders)
+1. Go to https://splitbrain.github.io/pinoutleaf/
 2. Edit the YAML configuration in the editor.
 3. The SVG diagrams will update automatically.
 4. Click the images to download them 

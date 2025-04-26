@@ -36,8 +36,12 @@ export class Editor {
             // this.ace.setValue("title: My PCB\nwidth: 5\nheight: 5\npins:\n  left: []\n  right: []\n  top: []\n  bottom: []", -1);
         }
 
+        // register change handler
         this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
         this.onChange(); // Trigger initial processing
+
+        // register download handler
+        this.output.addEventListener('click', this.onDownloadClick);
     }
 
     debounce(func, wait) {
@@ -86,6 +90,23 @@ export class Editor {
         this.output.innerHTML = '';
         this.output.appendChild(front);
         this.output.appendChild(back);
+    }
+
+    onDownloadClick(e) {
+        const svg = e.target.closest('svg');
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svg);
+        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'pinout.svg';
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     showError(lineNumber, column, message, isWarning) {

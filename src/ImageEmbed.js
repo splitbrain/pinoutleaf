@@ -104,7 +104,7 @@ export class ImageEmbed {
      * Modifies the setup object in place, replacing src with data URIs.
      * Logs warnings if embedding fails for a specific image.
      * @param {object} setup - The setup object containing image configurations.
-     * @returns {Promise<void>} A promise that resolves when embedding attempts are complete.
+     * @returns {Promise<object>} A promise that resolves with the modified setup object.
      */
     async embedImages(setup) {
         const imageConfigs = [
@@ -125,5 +125,6 @@ export class ImageEmbed {
                 }
             }
         }
+        return setup; // Return the modified setup object
     }
 }

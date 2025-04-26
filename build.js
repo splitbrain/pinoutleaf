@@ -12,6 +12,7 @@ const commonOptions = {
     minify: true,
     target: ['esnext'],
     format: 'esm',
+    logLevel: 'info',
     loader: {
         '.woff2': 'dataurl',
     }
@@ -22,7 +23,7 @@ const cliOptions = {
     entryPoints: ['./src/cli.js'],
     outfile: './dist/cli.js',
     platform: 'node',
-    external: ['svgdom'],
+    external: ['svgdom', 'fs', 'hjson'],
     banner: {
         js: '#!/usr/bin/env node',
     },

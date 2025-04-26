@@ -6,7 +6,7 @@ import {PinLabel} from "./components/PinLabel.js";
 import {Legend} from "./components/Legend.js";
 import {Title} from "./components/Title.js";
 import {Pcb} from "./components/Pcb.js";
-import merge from 'lodash.merge'
+import merge from 'lodash.merge';
 
 export class Builder {
 

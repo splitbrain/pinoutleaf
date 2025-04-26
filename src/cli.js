@@ -1,12 +1,29 @@
 import {createWindow} from "svgdom";
 import {Builder} from "./Builder.js";
+import Hjson from 'hjson';
+import { readFileSync } from 'fs';
 
 function printHelp() {
     console.log(`Usage: node ${process.argv[1]} [options]`);
     console.log("Options:");
     console.log("  -h, --help    Display this help message.");
-    console.log("\nGenerates an SVG representation based on configuration.");
-    console.log("copyright 2025");
+    console.log("\nGenerates SVG pinout leaves based on given configuration files.");
+}
+
+
+function processDir(dir) {
+
+}
+
+function processFile(file) {
+    const data = readFileSync(file, 'utf8');
+    const setup = Hjson.parse(data);
+    const builder = new Builder(setup);
+
+    const window = createWindow();
+    const svg = builder.build().render(window.document);
+
+    console.log(svg.outerHTML);
 }
 
 function main() {
@@ -18,14 +35,6 @@ function main() {
         process.exit(0); // Exit successfully after showing help
     }
 
-    // Proceed with SVG generation if no help flag
-    const window = createWindow();
-    const builder = new Builder();
-
-    const svg = builder.build();
-    const el = svg.render(window.document);
-
-    console.log(el.outerHTML);
 }
 
 main();

@@ -32,9 +32,8 @@ async function processDir(dir) {
         }
     } catch (readDirError) {
         console.error(`Failed reading directory '${dir}': ${readDirError.message}`);
-            errors++;
-        }
-    }
+        errors++;
+    } // Removed extra closing brace here
     return errors;
 }
 

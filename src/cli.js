@@ -1,7 +1,8 @@
 import { createWindow } from "svgdom";
 import { Builder } from "./Builder.js";
 import Hjson from 'hjson';
-import { readFileSync, statSync } from 'fs';
+import { readFileSync, statSync, readdirSync } from 'fs';
+import { join } from 'path';
 
 function printHelp() {
     console.log(`Usage: node ${process.argv[1]} [options]`);
@@ -12,7 +13,27 @@ function printHelp() {
 
 
 function processDir(dir) {
-
+    try {
+        const files = readdirSync(dir);
+        files.forEach(file => {
+            const filePath = join(dir, file);
+            // Check if it's a file and has the correct extension
+            try {
+                const stats = statSync(filePath);
+                if (stats.isFile() && (file.endsWith('.json') || file.endsWith('.hjson'))) {
+                    processFile(filePath);
+                }
+            } catch (statError) {
+                // Log error if stat fails for a specific file, but continue with others
+                console.error(`Error getting stats for '${filePath}': ${statError.message}`);
+                // Increment error count? Need access to 'errors' or return status.
+            }
+        });
+    } catch (error) {
+        console.error(`Error reading directory '${dir}': ${error.message}`);
+        // Increment error count? Need access to 'errors' or return status.
+        // Consider how to handle errors from processDir in main loop.
+    }
 }
 
 function processFile(file) {
@@ -47,8 +68,10 @@ function main() {
         try {
             const stats = statSync(arg);
             if (stats.isFile()) {
+                // Directly process files specified as arguments
                 processFile(arg);
             } else if (stats.isDirectory()) {
+                // Process directories specified as arguments
                 processDir(arg);
             } else {
                 console.error(`Error: '${arg}' is not a file or directory.`);

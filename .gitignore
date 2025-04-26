@@ -2,3 +2,4 @@
 dist
 !dist/index.html
 node_modules
+pinouts/*.svg

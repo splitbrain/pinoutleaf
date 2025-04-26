@@ -20,7 +20,6 @@ export class Image extends BaseElement {
             width,
             height,
             href, // Standard SVG 2 attribute
-            'xlink:href': href, // For broader compatibility
             ...attrs
         });
     }

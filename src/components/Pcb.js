@@ -34,11 +34,9 @@ export class Pcb extends Group {
         const pcbY = -padding;
 
         if (image?.front?.src) {
-            // Use helper to create and adjust the image
             const imgElement = this.createImageBackground(pcbX, pcbY, pcbWidth, pcbHeight, image.front);
             this.append(imgElement);
         } else {
-            // Use helper to create the rectangle (already correctly called)
             this.append(this.createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
         }
     }

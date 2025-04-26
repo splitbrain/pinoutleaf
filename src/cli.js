@@ -1,11 +1,11 @@
 import {createWindow} from "svgdom";
 import {Builder} from "./Builder.js";
 import Yaml from 'yaml';
-import {readdirSync, readFileSync, statSync} from 'fs';
+import {readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {join} from 'path';
 
 function printHelp() {
-    console.log(`Usage: node ${process.argv[1]} [options] file/dir ...`);
+    console.log(`Usage: node ${process.argv[1]} [options] <file/dir> ...`);
     console.log("Options:");
     console.log("  -h, --help    Display this help message.");
     console.log("\nGenerates SVG pinout leaves based on given configuration files in yaml or json format.");
@@ -37,21 +37,22 @@ function processFile(file) {
     let setup;
     if (file.endsWith('.yaml')) {
         setup = Yaml.parse(data);
-
-        console.log(setup);
-
     } else if (file.endsWith('.json')) {
         setup = JSON.parse(data);
     } else {
         throw new Error(`Unsupported file type: ${file}`);
     }
 
+    const outputBase = file.replace(/\.(yaml|json)$/, '');
+
     const builder = new Builder(setup);
-
     const window = createWindow();
-    const svg = builder.build().render(window.document);
 
-    console.log(svg.outerHTML);
+    writeFileSync(outputBase + '.front.svg', builder.build().render(window.document).outerHTML, 'utf8');
+    console.info(outputBase + '.front.svg written');
+    builder.flip();
+    writeFileSync(outputBase + '.back.svg', builder.build().render(window.document).outerHTML, 'utf8');
+    console.info(outputBase + '.back.svg written');
 }
 
 function main() {

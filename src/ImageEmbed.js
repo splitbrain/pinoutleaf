@@ -98,4 +98,32 @@ export class ImageEmbed {
         console.debug(`Received data URI for ${source} from service (length: ${dataUri.length})`);
         return dataUri;
     }
+
+    /**
+     * Attempts to embed images defined in the setup structure.
+     * Modifies the setup object in place, replacing src with data URIs.
+     * Logs warnings if embedding fails for a specific image.
+     * @param {object} setup - The setup object containing image configurations.
+     * @returns {Promise<void>} A promise that resolves when embedding attempts are complete.
+     */
+    async embedImages(setup) {
+        const imageConfigs = [
+            setup?.image?.front,
+            setup?.image?.back
+        ];
+
+        for (const config of imageConfigs) {
+            if (config && config.src) {
+                const originalSrc = config.src;
+                try {
+                    console.debug(`Attempting to embed image: ${originalSrc}`);
+                    config.src = await this.embed(originalSrc);
+                    console.debug(`Successfully embedded image: ${originalSrc}`);
+                } catch (error) {
+                    console.warn(`Failed to embed image "${originalSrc}": ${error.message}. Keeping original source.`);
+                    // Keep original config.src
+                }
+            }
+        }
+    }
 }

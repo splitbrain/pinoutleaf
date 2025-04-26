@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs';
 import { extname } from 'path';
-import mime from 'mime-types';
 
 // Basic environment detection
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
@@ -10,6 +9,8 @@ const isNode = typeof process !== 'undefined' && process.versions != null && pro
  * Behaves differently in Node.js (fetches/reads directly) vs. Browser (uses a service).
  */
 export class ImageEmbed {
+    // cloudflare worker for transforming images to data URIs
+    static SERVICE = 'https://imgdataurl.splitbrain.workers.dev/';
 
     /**
      * Embeds an image from a URL or local file path into a data URI.
@@ -46,16 +47,29 @@ export class ImageEmbed {
                     throw new Error(`Failed to fetch image '${source}': ${response.status} ${response.statusText}`);
                 }
                 buffer = Buffer.from(await response.arrayBuffer());
-                // Prefer Content-Type header, fall back to extension lookup
-                mimeType = response.headers.get('content-type')?.split(';')[0] || mime.lookup(source) || 'application/octet-stream';
-                console.debug(`Fetched image: ${source}, MIME type: ${mimeType}, Size: ${buffer.length} bytes`);
+                // Get MIME type from Content-Type header
+                mimeType = response.headers.get('content-type')?.split(';')[0].toLowerCase();
+                console.debug(`Fetched image: ${source}, Content-Type: ${mimeType}, Size: ${buffer.length} bytes`);
 
             } else {
                 // Read local file
                 console.debug(`Reading local image file: ${source}`);
                 buffer = readFileSync(source);
-                mimeType = mime.lookup(source) || 'application/octet-stream';
-                 console.debug(`Read local file: ${source}, MIME type: ${mimeType}, Size: ${buffer.length} bytes`);
+                // Determine MIME type from file extension
+                const extension = extname(source).toLowerCase();
+                if (extension === '.jpg' || extension === '.jpeg') {
+                    mimeType = 'image/jpeg';
+                } else if (extension === '.png') {
+                    mimeType = 'image/png';
+                } else {
+                    mimeType = null; // Unsupported type
+                }
+                 console.debug(`Read local file: ${source}, Determined MIME type: ${mimeType}, Size: ${buffer.length} bytes`);
+            }
+
+            // Validate MIME type
+            if (mimeType !== 'image/jpeg' && mimeType !== 'image/png') {
+                 throw new Error(`Unsupported image type for source "${source}". Only JPEG and PNG are supported. Detected type: ${mimeType || 'unknown'}`);
             }
 
             const base64 = buffer.toString('base64');
@@ -75,8 +89,9 @@ export class ImageEmbed {
      * @private
      */
     async _embedBrowser(source) {
-        // Assumes a backend service exists to handle embedding and CORS
-        const embedServiceUrl = `/api/embed-image?url=${encodeURIComponent(source)}`;
+        // Assumes a backend service exists to handle embedding and CORS.
+        // This service should also enforce the JPEG/PNG only limitation.
+        const embedServiceUrl = `${ImageEmbed.SERVICE}?url=${encodeURIComponent(source)}`;
         console.debug(`Requesting data URI from service: ${embedServiceUrl}`);
         try {
             const response = await fetch(embedServiceUrl);

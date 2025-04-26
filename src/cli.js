@@ -6,7 +6,6 @@ function main() {
     const builder = new Builder();
 
     const svg = builder.build();
-
     const el = svg.render(window.document);
 
     console.log(el.outerHTML);

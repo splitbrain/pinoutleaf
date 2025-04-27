@@ -1,4 +1,29 @@
 /**
+ * Basic styles
+ */
+html, body {
+    min-height: 100vh;
+    margin: 0;
+
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: #5B9821;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+/**
  * Standard Panel Layout
  */
 .editor {
@@ -23,6 +48,10 @@
         }
     }
 }
+
+/**
+ * Editor and Output Styles
+ */
 
 .panel-editor {
     display: flex;
@@ -53,5 +82,29 @@
         padding: 1em;
         border: 1px solid #ccc;
         cursor: pointer;
+    }
+}
+
+/**
+ * Print Styles
+ */
+@media print {
+    p {
+        display: none;
+    }
+
+    .panel-editor {
+        display: none;
+    }
+
+    .editor {
+        display: block;
+
+        #output svg {
+                width: initial;
+                height: initial;
+                max-height: none;
+                display: block;
+        }
     }
 }

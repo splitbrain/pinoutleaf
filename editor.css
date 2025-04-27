@@ -24,12 +24,22 @@
     }
 }
 
+.panel-editor {
+    display: flex;
+    flex-direction: column;
+
+    p {
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+}
 
 .editor {
     #editor {
-        height: 100%;
         min-height: 50vh;
         width: 100%;
+        flex-grow: 1;
+        flex-shrink: 1;
 
         border: 1px solid #ccc;
     }

@@ -2,7 +2,7 @@
 
 Pinout diagrams for microcontrollers and other PCBs are well known, but it can be hard always comparing the pinout diagram with the real PCB, counting pins. One solution is to print out a diagram that has exactly the right size to push the pins through the paper and have the labels right next to the actual pin.
 
-This project is meant for easily creating such pinout leafs.
+This project is meant for easily creating such pinout leaves.
 
 The pins can be described by a simple YAML-based description and the tool automatically creates the diagram as an SVG.
 
@@ -61,9 +61,9 @@ None of the tools above focus on dimensional accuracy and printing. They are mor
 3. The SVG diagrams will update automatically.
 4. Click the images to download them.
 
-Feel free to open an issue when you create a new pinout leaf and we can add it to the list of existing leafs.
+Feel free to open an issue when you create a new pinout leaf and we can add it to the list of existing leaves.
 
-### Premade Leafs
+### Premade Leaves
 
 Check the [pinouts](https://github.com/splitbrain/pinoutleaf/tree/gh-pages/pinouts) directory for boards that have already been defined.
 

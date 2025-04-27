@@ -8,6 +8,8 @@ This project is meant for easily creating such pinout leafs.
 
 The pins can be described by a simple YAML based description and the tool automatically creates the diagram as a SVG.
 
+![Print Example](print-example.jpg)
+
 ## Features
 
 * **SVG Output:**
@@ -35,6 +37,16 @@ The pins can be described by a simple YAML based description and the tool automa
 * Only four rows of pins are supported
 * No weird arbitrary layouts
 * Only standard 0.1 inch pin raster supported (might change in the future)
+
+## Alternatives
+
+* [Youtube: Feather Diagrams Walk-Through for Adafruit](https://www.youtube.com/watch?v=ndVs1UvK6AE) - doing it the manual way in Inkscape
+* [GenPinoutSVG](https://github.com/stevenj/GenPinoutSVG) - a Python tool using CSV files as input
+* [Pinion](https://yaqwsx.github.io/Pinion/) - creates pinout diagrams from KiCAD PCB files
+* [PCBDraw](https://github.com/yaqwsx/PcbDraw) - another KiCAD based tool
+* [Integrated Circuit Pinout Diagram Generator](https://github.com/cmfcmf/ic-pinout-diagram-generator) - probably closest to this project, but without an editor
+
+None of the tools above focus on dimensional accuracy and printing. They are more about creating diagrams for documentation or web pages.
 
 ## Usage
 

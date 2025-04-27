@@ -46,4 +46,4 @@ types:
   input:
     bgcolor: "#7AC943"
     fgcolor: "#ffffff"
-
+    label: Input

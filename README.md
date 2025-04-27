@@ -1,10 +1,12 @@
-# Pinout Leaf Generator
+# Pinout Leaf Generator 🌿
 
 Pinout diagrams for microcontrollers and other PCBs are well known, but it can be hard always comparing the pinout diagram with the real PCB, counting pins. One solution is to print out a diagram that has exactly the right size to push the pins through the paper and have the labels right next to the actual pin.
 
 This project is meant for easily creating such pinout leafs.
 
 The pins can be described by a simple YAML-based description and the tool automatically creates the diagram as an SVG.
+
+Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/)**
 
 ![Print Example](print-example.jpg)
 

@@ -1,0 +1,63 @@
+title: "Raspberry Pi"
+
+# dimensions counted in pins
+width: 2
+height: 20
+
+
+pins:
+  left:
+    - [ "1", "3V3:power" ]
+    - [ "3", "GPIO2:gpio", "SDA:i2c" ]
+    - [ "5", "GPIO3:gpio", "SDL:i2c" ]
+    - [ "7", "GPIO4:gpio" ]
+    - [ "9", "GND:gnd" ]
+    - [ "11", "GPIO17:gpio" ]
+    - [ "13", "GPIO27:gpio" ]
+    - [ "15", "GPIO22:gpio" ]
+    - [ "17", "3V3:power"]
+    - [ "19", "GPIO10:gpio", "MOSI:spi" ]
+    - [ "21", "GPIO9:gpio", "MISO:spi" ]
+    - [ "23", "GPIO11:gpio", "SCLK:spi" ]
+    - [ "25", "GND:gnd" ]
+    - [ "27", "GPIO0:gpio", "SDA:eeprom" ]
+    - [ "29", "GPIO5:gpio" ]
+    - [ "31", "GPIO6:gpio" ]
+    - [ "33", "GPIO13:gpio", "PWM1:pwm" ]
+    - [ "35", "GPIO19:gpio", "PWM1:pwm", "FS:pcm" ]
+    - [ "37", "GPIO26:gpio" ]
+    - [ "39", "GND:gnd" ]
+
+  right:
+    - [ "2", "5V:power" ]
+    - [ "4", "5V:power" ]
+    - [ "6", "GND:gnd" ]
+    - [ "8", "GPIO14:gpio", "TX:uart" ]
+    - [ "10", "GPIO15:gpio", "RX:uart" ]
+    - [ "12", "GPIO18:gpio", "CLK:pcm" ]
+    - [ "14", "GND:gnd" ]
+    - [ "16", "GPIO23:gpio" ]
+    - [ "18", "GPIO24:gpio" ]
+    - [ "20", "GND:gnd" ]
+    - [ "22", "GPIO25:gpio" ]
+    - [ "24", "GPIO8:gpio", "CE0:spi" ]
+    - [ "26", "GPIO7:gpio", "CE1:spi" ]
+    - [ "28", "GPIO1:gpio", "SCL:eeprom" ]
+    - [ "30", "GND:gnd" ]
+    - [ "32", "GPIO12:gpio" ]
+    - [ "34", "GND:gnd" ]
+    - [ "36", "GPIO16:gpio" ]
+    - [ "38", "GPIO20:gpio", "DIN:pcm" ]
+    - [ "40", "GPIO21:gpio", "DOUT:pcm" ]
+
+types:
+  pcm:
+    bgcolor: "#F7FFB4"
+    label: "PCM"
+  pwm:
+    bgcolor: "#FFDFFE"
+    label: "PWM"
+  eeprom:
+    bgcolor: "#cccccc"
+    label: "EEPROM I2C"
+

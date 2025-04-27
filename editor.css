@@ -37,6 +37,7 @@
     #output svg {
         width: 100%;
         height: auto;
+        max-height: 100vh;
         display: block;
         margin-bottom: 1em;
         padding: 1em;

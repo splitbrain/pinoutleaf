@@ -1,0 +1,49 @@
+title: "A4988 Motor Driver"
+
+# dimensions counted in pins
+width: 6
+height: 8
+
+image:
+  front:
+    src: a4988.front.png
+  back:
+    src: a4988.back.png
+
+pins:
+  left:
+    - [ "EN:input" ]
+    - [ "MS1:mode" ]
+    - [ "MS2:mode" ]
+    - [ "MS3:mode" ]
+    - [ "RST:control" ]
+    - [ "SLP:control" ]
+    - [ "STP:input" ]
+    - [ "DIR:input" ]
+  right:
+    - [ "V+:power" ]
+    - [ "V-:gnd" ]
+    - [ "2B:motor" ]
+    - [ "2A:motor" ]
+    - [ "1A:motor" ]
+    - [ "1B:motor" ]
+    - [ "5V:power" ]
+    - [ "GND:gnd" ]
+
+types:
+  motor:
+    bgcolor: "#439ED6"
+    fgcolor: "#ffffff"
+    label: Output
+  control:
+    bgcolor: "#EA8326"
+    fgcolor: "#ffffff"
+    label: Control
+  mode:
+    bgcolor: "#D83A94"
+    fgcolor: "#ffffff"
+    label: Mode
+  input:
+    bgcolor: "#7AC943"
+    fgcolor: "#ffffff"
+

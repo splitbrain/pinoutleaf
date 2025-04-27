@@ -1,6 +1,6 @@
 # Pinout Leaf Generator
 
-Pinout diagrams for micro controllers and other PCBs are well known, but it can be hard always comparing the pinout
+Pinout diagrams for microcontrollers and other PCBs are well known, but it can be hard always comparing the pinout
 diagram with the real PCB, counting pins. One solution is to print out a diagram that has exactly the right size to push
 the pins through the paper and have the labels right next to the actual pin.
 
@@ -13,7 +13,7 @@ The pins can be described by a simple YAML based description and the tool automa
 * **SVG Output:**
   * Generates clean, scalable SVG diagrams.
   * Default sizes match the real world PCB exactly, just print at 100%
-  * Fully self contained, font and image resources are embedded into the file so it's fully portable
+  * Fully self-contained, font and image resources are embedded into the file so it's fully portable
 * **Configuration:**
   * Define pinouts, board dimensions, labels, and types using simple YAML or JSON files.
   * Custom types allow control over colors and legend labels
@@ -143,11 +143,11 @@ There are the following predefined types, which you can use without defining the
 
 ### image
 
-For nicer diagrams you can define background images (JPEG or PNG only) to use instead of a general green PCP background. You can set a front and back side image separately.
+For nicer diagrams you can define background images (JPEG or PNG only) to use instead of a general green PCB background. You can set a front and back side image separately.
 
 Images can be referenced as local file or as URL. In both cases the generator will try to actually embed the image in the generated SVG as a dataurl.
 
-By default your image will be stretched to exactly match the size defined by the pins. However you picture will probably not fit exactly. Using the `left`, `right`, `top` and `bottom` properties you can define offsets from the respective edges. Negative numbers will move the image edge outwards, postive numbers inwards. The offsets are given in one-hundreds of a millimeter, eg. 100 is 1mm. Best interactively experiment in the web editor until the image fits. 
+By default, your image will be stretched to exactly match the size defined by the pins. However, you picture will probably not fit exactly. Using the `left`, `right`, `top` and `bottom` properties you can define offsets from the respective edges. Negative numbers will move the image edge outwards, postive numbers inwards. The offsets are given in one-hundreds of a millimeter, eg. 100 is 1mm. Best interactively experiment in the web editor until the image fits. 
 
 ```yaml
 image:
@@ -167,7 +167,7 @@ image:
 
 ### offsets
 
-By default the pin rows will sit on the edge of the defined board size. Sometimes you might want to define your board's size larger than the actual pin area is. You then can use the offsets setting to move a pi row further in.
+By default, the pin rows will sit on the edge of the defined board size. Sometimes you might want to define your board's size larger than the actual pin area is. You then can use the offsets setting to move a pi row further in.
 
 For example the Raspberry Pi has two rows of Pins all the way to the right edge of a much larger board. In this case you might want to define the overall size of the board but then offset the left row of pins so it moves over nearly to the right edge.
 

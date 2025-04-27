@@ -39,7 +39,7 @@ export class Builder {
         // types
         types: {
             default: {
-                label: 'PIN',
+                label: 'Pin',
                 bgcolor: '#ffffff',
                 fgcolor: '#000000',
             },

@@ -5,8 +5,8 @@
     <script>
         new EventSource('/esbuild').addEventListener('change', () => location.reload());
     </script>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🌿%3C/text%3E%3C/svg%3E">
-    <link type="text/css" rel="stylesheet" href="web.css">
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E🌿%3C/text%3E%3C/svg%3E">
     <link type="text/css" rel="stylesheet" href="editor.css">
 
 </head>
@@ -16,21 +16,24 @@
     <div class="panel panel-editor">
         <div id="editor"></div>
         <p>
-            Examples:
-            <a href="?load=pinouts/esp32-c3-super-mini.yaml">ESP32-C3 Super Mini</a>
-            <a href="?load=pinouts/raspberry-pi.yaml">Raspberry Pi</a>
+            Load an Example:
+            <a href="?load=pinouts/esp32-c3-super-mini.yaml">ESP32-C3 Super Mini</a>,
+            <a href="?load=pinouts/raspberry-pi.yaml">Raspberry Pi</a>,
             <a href="?load=pinouts/a4988.yaml">A4988 Motor Driver</a>
         </p>
 
         <p>
-            <a href="https://github.com/splitbrain/pinoutleaf?tab=readme-ov-file#configuration-syntax">Read the docs</a>
-            for more info on available config options.
+            <b>Learn more</b> about the tool and available config options in the
+            <a href="https://github.com/splitbrain/pinoutleaf">Github Repository</a>.
         </p>
     </div>
     <div class="panel panel-output">
         <div id="output"></div>
 
-        <p>Click images to download.</p>
+        <p>
+            ☝️ Click the images to download.
+            <a href="javascript:print()">🖨️ Click here to print them</a>.
+        </p>
     </div>
 </div>
 

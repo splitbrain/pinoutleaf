@@ -3,3 +3,4 @@ node_modules
 
 public/dist
 public/pinouts/*.svg
+public/index.json

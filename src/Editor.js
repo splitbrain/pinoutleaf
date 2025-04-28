@@ -94,7 +94,7 @@ export class Editor {
             if (savedYaml) {
                 this.ace.setValue(savedYaml, -1);
             } else {
-                this.ace.setValue("# Hi!\n# New here? Load an example from below!", -1);
+                this.ace.setValue("# Hi!\n# New here? Load an existing definition from below!", -1);
             }
         }
     }

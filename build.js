@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
-import { mkdir, readdir, readFile, writeFile } from 'fs/promises';
+import {mkdir, readdir, readFile, writeFile} from 'fs/promises';
 import path from 'path';
-import yaml from 'js-yaml';
+import YAML from 'yaml'; // Use the existing 'yaml' package
 
 const watch = process.argv.includes('--watch');
 const serve = process.argv.includes('--serve');
@@ -9,31 +9,20 @@ const serve = process.argv.includes('--serve');
 const PINOUTS_DIR = 'public/pinouts';
 const INDEX_JSON_PATH = 'public/index.json';
 
-await mkdir('./public/dist', { recursive: true });
+await mkdir('./public/dist', {recursive: true});
 
-const commonOptions = {
-    bundle: true,
-    sourcemap: true,
-    minify: true,
-    target: ['esnext'],
-    format: 'esm',
-    logLevel: 'info',
-    loader: {
-        '.woff2': 'dataurl',
-    },
-};
 
 // --- Pinout Index Generation ---
 
 async function findYamlFiles(dir) {
     let yamlFiles = [];
     try {
-        const entries = await readdir(dir, { withFileTypes: true });
+        const entries = await readdir(dir, {withFileTypes: true});
         for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
             if (entry.isDirectory()) {
                 yamlFiles = yamlFiles.concat(await findYamlFiles(fullPath));
-            } else if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+            } else if (entry.isFile() && (entry.name.endsWith('.yaml'))) {
                 yamlFiles.push(fullPath);
             }
         }
@@ -55,8 +44,8 @@ async function generateIndexJson() {
     for (const filePath of yamlFiles) {
         try {
             const fileContent = await readFile(filePath, 'utf-8');
-            const doc = yaml.load(fileContent);
-            const title = doc?.setup?.title;
+            const doc = YAML.parse(fileContent); // Use YAML.parse instead of yaml.load
+            const title = doc?.title;
             if (title) {
                 // Make path relative to 'public' directory
                 const relativePath = path.relative('public', filePath);
@@ -94,8 +83,8 @@ const pinoutIndexPlugin = {
         // Run on end of each build (including rebuilds in watch/serve mode)
         build.onEnd(async (result) => {
             if (result.errors.length === 0 && (watch || serve)) {
-                 // Check if relevant files changed? For now, regenerate always on success.
-                 // A more sophisticated check could involve tracking YAML file mtimes.
+                // Check if relevant files changed? For now, regenerate always on success.
+                // A more sophisticated check could involve tracking YAML file mtimes.
                 await generateIndexJson();
             }
         });
@@ -105,9 +94,21 @@ const pinoutIndexPlugin = {
 
 // --- ESBuild Options ---
 
+const commonOptions = {
+    bundle: true,
+    sourcemap: true,
+    minify: true,
+    target: ['esnext'],
+    format: 'esm',
+    logLevel: 'info',
+    loader: {
+        '.woff2': 'dataurl',
+    },
+};
+
 const cliOptions = {
     ...commonOptions,
-    plugins: [pinoutIndexPlugin], // Add plugin here
+    plugins: [pinoutIndexPlugin],
     entryPoints: ['./src/cli.js'],
     outfile: './public/dist/cli.js',
     platform: 'node',
@@ -126,7 +127,6 @@ const browserOptions = {
     define: {
         global: 'window'
     },
-    plugins: [pinoutIndexPlugin], // Add plugin here
 };
 
 async function build() {

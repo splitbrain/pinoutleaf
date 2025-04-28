@@ -1,0 +1,98 @@
+title: "Raspberry Pi Pico"
+
+# dimensions counted in pins
+width: 9
+height: 20
+
+# special pins
+types:
+  control:
+    label: "System Control"
+    bgcolor: "#ffaaaa"
+    fgcolor: "#000000"
+  debug:
+    label: "Debug"
+    bgcolor: "#ff88ff"
+    fgcolor: "#ffffff"
+  led:
+    label: "Onboard LED"
+    bgcolor: "#ffff00"
+    fgcolor: "#0"
+  uart_default:
+    label: "UART default"
+    bgcolor: "#0"
+    fgcolor: "#ffffff"
+  i2c_default:
+    label: "I2C default"
+    bgcolor: "#00aabb"
+    fgcolor: "#ffffff"
+  spi_default:
+    label: "SPI default"
+    bgcolor: "#9900ff"
+    fgcolor: "#ffffff"
+
+image:
+  front:
+    src: raspberry-pi-pico.front.png
+    top: -170
+    bottom: -20
+  back:
+    src: raspberry-pi-pico.back.png
+    top: -130
+    bottom: -30
+
+# Define the pins (label:type), use empty entries when offsets are needed
+pins:
+  left:
+    - [ "GPIO0:gpio", "SPI0 RX:spi", "I2C0 SDA:i2c", "UART0 TX:uart_default"]
+    - [ "GPIO1:gpio", "SPI0 CSn:spi", "I2C0 SCL:i2c", "UART0 TX:uart_default"]
+    - [ "3", "GND:gnd"]
+    - [ "GPIO2:gpio", "SPI0 SCK:spi", "I2C1 SDA:i2c" ]
+    - [ "GPIO3:gpio", "SPI0 TX:spi", "I2C1 SCL:i2c" ]
+    - [ "GPIO4:gpio", "SPI0 RX:spi", "I2C0 SDA:i2c_default", "UART1 TX:uart"]
+    - [ "GPIO5:gpio", "SPI0 CSn:spi", "I2C0 SCL:i2c_default", "UART1 TX:uart"]
+    - [ "6","GND:gnd"]
+    - [ "GPIO6:gpio", "SPI0 SCK:spi", "I2C1 SDA:i2c" ]
+    - [ "GPIO7:gpio", "SPI0 TX:spi", "I2C1 SCL:i2c" ]
+    - [ "GPIO8:gpio", "SPI1 RX:spi", "I2C0 SDA:i2c", "UART1 TX:uart"]
+    - [ "GPIO9:gpio", "SPI1 CSn:spi", "I2C0 SCL:i2c", "UART1 TX:uart"]
+    - [ "13", "GND:gnd"]
+    - [ "GPIO10:gpio", "SPI1 SCK:spi", "I2C1 SDA:i2c" ]
+    - [ "GPIO11:gpio", "SPI1 TX:spi", "I2C1 SCL:i2c" ]
+    - [ "GPIO12:gpio", "SPI1 RX:spi", "I2C0 SDA:i2c", "UART1 TX:uart"]
+    - [ "GPIO13:gpio", "SPI1 CSn:spi", "I2C0 SCL:i2c", "UART1 TX:uart"]
+    - [ "18", "GND:gnd"]
+    - [ "GPIO14:gpio", "SPI1 SCK:spi", "I2C1 SDA:i2c" ]
+    - [ "GPIO15:gpio", "SPI1 TX:spi", "I2C1 SCL:i2c" ]
+
+  right:
+    - [ "VBUS:power" ]
+    - [ "VSYS:power" ]
+    - [ "38", "GND:gnd" ]
+    - [ "3v3_EN:control" ]
+    - [ "3V3(out):power" ]
+    - [ "ADC_VREF:analog"]
+    - [ "GPIO28:gpio", "ADC2:analog" ]
+    - [ "33", "GND:gnd", "AGND:analog" ]
+    - [ "GPIO27:gpio", "ADC1:analog", "I2C1 SCL:i2c" ]
+    - [ "GPIO26:gpio", "ADC0:analog", "I2C1 SDA:i2c" ]
+    - [ "RUN:control"]
+    - [ "GPIO22:gpio" ]
+    - [ "28", "GND:gnd" ]
+    - [ "GPIO21:gpio", " ", "I2C0 SCL:i2c" ]
+    - [ "GPIO20:gpio", " ", "I2C0 SDA:i2c" ]
+    - [ "GPIO19:gpio", "SPI0 TX:spi_default", "I2C1 SCL:i2c" ]
+    - [ "GPIO18:gpio", "SPI0 SCK:spi_default", "I2C1 SDA:i2c" ]
+    - [ "23", "GND:gnd" ]
+    - [ "GPIO17:gpio", "SPI0 CSn:spi_default", "I2C0 SCL:i2c", "UART0 RX:uart" ]
+    - [ "GPIO16:gpio", "SPI0 RX:spi_default", "I2C0 SDA:i2c", "UART0 TX:uart" ]
+
+  bottom:
+    -
+    -
+    -
+    - [ "SWKCLK:debug"]
+    - [ "GND:gnd"]
+    - [ "SWDIO:debug"]
+
+

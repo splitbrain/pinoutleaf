@@ -7,7 +7,6 @@ export class Defs extends BaseElement {
 
 
     const style = new BaseElement('style', { type: 'text/css' });
-
     // Embed the Open-Sans font
     style.textContent = `
       @font-face {
@@ -15,8 +14,14 @@ export class Defs extends BaseElement {
         src: url('${fontData}') format('woff2');
       }
     `;
-
     this.append(style);
+
+    const filter = new BaseElement('filter', { id: 'grayscale' });
+    filter.append(new BaseElement('feColorMatrix', {
+      type: 'saturate',
+      values: '0'
+    }));
+    this.append(filter);
   }
 
   render(document) {

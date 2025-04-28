@@ -71,6 +71,7 @@ export class Pcb extends Group {
         return new Image(imgX, imgY, imgWidth, imgHeight, src, {
             preserveAspectRatio: 'none',
             'opacity': opacity,
+            filter: 'url(#grayscale)',
         });
     }
 

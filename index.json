@@ -1,0 +1,6 @@
+{
+  "pinouts/a4988.yaml": "A4988 Motor Driver",
+  "pinouts/esp32-c3-super-mini.yaml": "ESP32 C3 Super Mini",
+  "pinouts/raspberry-pi-pico.yaml": "Raspberry Pi Pico",
+  "pinouts/raspberry-pi.yaml": "Raspberry Pi"
+}

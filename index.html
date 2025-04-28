@@ -16,11 +16,12 @@
     <div class="panel panel-editor">
         <div id="editor"></div>
         <p>
-            Load an Example:
-            <a href="?load=pinouts/esp32-c3-super-mini.yaml">ESP32-C3 Super Mini</a>,
-            <a href="?load=pinouts/raspberry-pi.yaml">Raspberry Pi</a>,
-            <a href="?load=pinouts/a4988.yaml">A4988 Motor Driver</a>
+            <label for="example-select">Load an existing definition:</label>
+            <select name="examples" id="example-select">
+                <option value="">pick a board</option>
+            </select>
         </p>
+
 
         <p>
             <b>Learn more</b> about the tool and available config options in the
@@ -41,5 +42,49 @@
 <p>
     <small>A tool made by <a href="https://www.splitbrain.org">splitbrain</a></small>
 </p>
+
+
+<script>
+    // load existing definitions
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectElement = document.getElementById('example-select');
+
+        fetch('index.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Sort examples alphabetically by title
+                const sortedExamples = Object.entries(data).sort(([, titleA], [, titleB]) =>
+                    titleA.localeCompare(titleB)
+                );
+
+                sortedExamples.forEach(([path, title]) => {
+                    const option = document.createElement('option');
+                    option.value = path;
+                    option.textContent = title;
+                    selectElement.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading or parsing index.json:', error);
+                // Optionally disable the select or show an error message
+                selectElement.disabled = true;
+                const errorOption = document.createElement('option');
+                errorOption.textContent = 'Error loading examples';
+                selectElement.appendChild(errorOption);
+            });
+
+        selectElement.addEventListener('change', (event) => {
+            const selectedPath = event.target.value;
+            if (selectedPath) {
+                window.location.search = `?load=${encodeURIComponent(selectedPath)}`;
+            }
+        });
+    });
+</script>
 </body>
 </html>

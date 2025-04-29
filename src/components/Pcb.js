@@ -39,6 +39,8 @@ export class Pcb extends Group {
         } else {
             this.append(this.createRectBackground(pcbX, pcbY, pcbWidth, pcbHeight, fill));
         }
+
+        this.setPadding(this.pcbPadding(image));
     }
 
     /**
@@ -91,5 +93,32 @@ export class Pcb extends Group {
             rx: CORNERS,
             ry: CORNERS,
         });
+    }
+
+    /**
+     * Calculate padding to compensate for image offsets
+     *
+     * Offsets for PCB images can increase the size of the pin layout. These offsets are
+     * different for the front and back images. To be able to fold the diagrams on top of each
+     * other, we need them both to be the exact same size. This function calculates the
+     * padding needed to ensure that.
+     *
+     * @returns {number|object} The padding needed for the PCB images.
+     */
+    pcbPadding(image) {
+        if (!image.front.src && !image.back.src) return 0;
+
+        const diff = (front, back) => {
+            if (front > 0 && back > 0) return 0; // only negative values influence the PCB space
+            if (front < back) return 0; // front is the bigger number and sets the default
+            return Math.abs(front - back); // return the difference
+        }
+
+        return {
+            top: diff(image.front.top, image.back.top),
+            left: diff(image.front.left, image.back.left),
+            right: diff(image.front.right, image.back.right),
+            bottom: diff(image.front.bottom, image.back.bottom),
+        }
     }
 }

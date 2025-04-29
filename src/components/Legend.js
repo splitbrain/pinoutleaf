@@ -24,10 +24,7 @@ export class Legend extends Group {
 
         const itemsBBox = BaseElement.getCombinedBoundingBox(items);
         const background = this.createBackground(itemsBBox);
-
-        if (background) {
-            this.prepend(background);
-        }
+        this.prepend(background);
         this.children.push(...items); // Append all items at once
     }
 
@@ -89,10 +86,6 @@ export class Legend extends Group {
      * @returns {Rect|null} The background Rect element or null.
      */
     createBackground(itemsBBox) {
-        if (!itemsBBox) {
-            return null;
-        }
-
         return new Rect(
             itemsBBox.x - PADDING,
             itemsBBox.y - PADDING,

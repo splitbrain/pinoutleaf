@@ -101,10 +101,15 @@ a {
         display: block;
 
         #output svg {
-                width: initial;
-                height: initial;
-                max-height: none;
-                display: block;
+            width: initial;
+            height: initial;
+            max-height: none;
+            display: block;
+            margin: 0;
+        }
+
+        #output svg:last-child {
+            transform: rotate(180deg);
         }
     }
 }

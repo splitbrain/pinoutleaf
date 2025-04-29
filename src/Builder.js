@@ -103,6 +103,7 @@ export class Builder {
     constructor(setup) {
         this.setup = merge(this.setup, setup);
         this.normalizePinArrays();
+        this.isFlipped = false;
     }
 
     /**
@@ -130,24 +131,33 @@ export class Builder {
         pinLayoutGroup.prepend(pcb);
 
         // Create the title
-        const title = new Title(this.setup.title);
+        const title = new Title(this.setup.title + (this.isFlipped ? '  (back)' : ' (front)'));
         root.append(title)
 
         // Create the legend
-        const legend = new Legend(this.setup.types, this.setup.pins);
+        const legend = new Legend(this.setup.types, this.setup.pins, this.isFlipped);
         root.append(legend);
-
 
         // Get bounding box of the main pin layout
         const pinLayoutBBox = pinLayoutGroup.getBoundingBox();
         const legendBBox = legend.getBoundingBox();
         const titleBBox = title.getBoundingBox();
 
-        // Position title above the pin layout, left aligned
-        title.setTranslate(pinLayoutBBox.x, pinLayoutBBox.y - PADDING - titleBBox.height);
+        // Position legend to the right/left of the pin layout with padding
+        if(this.isFlipped) {
+            // FIXME
+            //   it's hacky:
+            //   rect returns the visual bounding box that includes the stroke width
+            //   for alignment we need to adjust for the stroke width, thus the +10
+            //   see Rect.getBoundingBox()
+            legend.setTranslate(pinLayoutBBox.x - legendBBox.width + 10 - (PADDING * 3), pinLayoutBBox.y);
+        } else {
+            legend.setTranslate(pinLayoutBBox.x + pinLayoutBBox.width + (PADDING * 3), pinLayoutBBox.y);
+        }
 
-        // Position legend to the right of the pin layout with padding
-        legend.setTranslate(pinLayoutBBox.x + pinLayoutBBox.width + PADDING * 3, pinLayoutBBox.y);
+        // Position title above the pin layout, left aligned
+        const rootBBox = root.getBoundingBox();
+        title.setTranslate(rootBBox.x, rootBBox.y - PADDING - titleBBox.height);
 
         // Update SVG bounds to include everything
         root.reframe();
@@ -162,6 +172,8 @@ export class Builder {
      * reverses the order of the top and bottom pins and swaps the front and back images.
      */
     flip() {
+        this.isFlipped = !this.isFlipped;
+
         // Swap left and right pins
         const tempLeftPins = this.setup.pins.left;
         this.setup.pins.left = this.setup.pins.right;

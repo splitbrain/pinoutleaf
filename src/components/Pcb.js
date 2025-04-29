@@ -60,8 +60,8 @@ export class Pcb extends Group {
             left = 0,
             right = 0,
             bottom = 0,
-            opacity = 0.5, // Default opacity if not specified
-            preserveAspectRatio = 'xMidYMid slice' // Default aspect ratio
+            opacity = 0.5,
+            grayscale = true
         } = imageConfig;
 
         // Adjust dimensions based on top, left, right, bottom offsets
@@ -70,11 +70,15 @@ export class Pcb extends Group {
         const imgWidth = basePcbWidth - left - right;
         const imgHeight = basePcbHeight - top - bottom;
 
-        return new Image(imgX, imgY, imgWidth, imgHeight, src, {
+        const options = {
             preserveAspectRatio: 'none',
             'opacity': opacity,
-            filter: 'url(#grayscale)',
-        });
+        }
+        if(grayscale) {
+            options['filter'] = 'url(#grayscale)';
+        }
+
+        return new Image(imgX, imgY, imgWidth, imgHeight, src, options);
     }
 
     /**

@@ -26,6 +26,8 @@ export class Builder {
                 left: 0,
                 right: 0,
                 bottom: 0,
+                opacity: 0.5,
+                grayscale: true,
             },
             back: {
                 src: '',
@@ -33,7 +35,9 @@ export class Builder {
                 left: 0,
                 right: 0,
                 bottom: 0,
-            }
+                opacity: 0.5,
+                grayscale: true,
+            },
         },
 
         // types
@@ -143,20 +147,27 @@ export class Builder {
         const legendBBox = legend.getBoundingBox();
         const titleBBox = title.getBoundingBox();
 
-        // Position legend to the right/left of the pin layout with padding
+        // Position legend to the bottom aligned to the right/left of the pin layout with padding
+        let rootBBox = root.getBoundingBox();
         if(this.isFlipped) {
             // FIXME
             //   it's hacky:
             //   rect returns the visual bounding box that includes the stroke width
             //   for alignment we need to adjust for the stroke width, thus the +10
             //   see Rect.getBoundingBox()
-            legend.setTranslate(pinLayoutBBox.x - legendBBox.width + 10 - (PADDING * 3), pinLayoutBBox.y);
+            legend.setTranslate(
+                pinLayoutBBox.x - legendBBox.width + 10 - (PADDING * 3),
+                rootBBox.y + rootBBox.height - legendBBox.height
+            );
         } else {
-            legend.setTranslate(pinLayoutBBox.x + pinLayoutBBox.width + (PADDING * 3), pinLayoutBBox.y);
+            legend.setTranslate(
+                pinLayoutBBox.x + pinLayoutBBox.width + (PADDING * 3),
+                rootBBox.y + rootBBox.height - legendBBox.height
+            );
         }
 
-        // Position title above the pin layout, left aligned
-        const rootBBox = root.getBoundingBox();
+        // Position title at the top, left aligned
+        rootBBox = root.getBoundingBox();
         title.setTranslate(rootBBox.x, rootBBox.y - PADDING - titleBBox.height);
 
         // Update SVG bounds to include everything

@@ -187,6 +187,16 @@ image:
     bottom: -170
 ```
 
+By default, images are shown at half opacity and grayscale. This is usually a good idea to make the labels and pins more legible when printing. For documentation, you might want to show the image in full color and opacity. You can do this by setting the `opacity` and `grayscale` properties.
+
+```yaml
+image:
+  front:
+    src: "esp32-c3-super-mini.front.png"
+    grayscale: false
+    opacity: 1
+```
+
 ### offsets
 
 By default, the pin rows will sit on the edges of the defined board size. Sometimes you might want to define your board's size larger than the actual pin area. You can use the offsets setting to move a pin row further in.

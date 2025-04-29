@@ -6,6 +6,38 @@ export class Group extends BaseElement {
         this.tx = 0;
         this.ty = 0;
         this.angle = 0; // Rotation angle in degrees (0, 90, 180, 270)
+        this.padding = {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0
+        };
+    }
+
+    /**
+     * Sets padding for the group. Padding expands the bounding box.
+     * @param {number|object} padding - Either a number for all sides, or an object with top, right, bottom, left properties
+     * @returns {Group} - The group instance for chaining
+     */
+    setPadding(padding) {
+        if (typeof padding === 'number') {
+            // Set the same padding for all sides
+            this.padding = {
+                top: padding,
+                right: padding,
+                bottom: padding,
+                left: padding
+            };
+        } else if (typeof padding === 'object') {
+            // Set individual paddings
+            this.padding = {
+                top: padding.top ?? this.padding.top,
+                right: padding.right ?? this.padding.right,
+                bottom: padding.bottom ?? this.padding.bottom,
+                left: padding.left ?? this.padding.left
+            };
+        }
+        return this;
     }
 
     /**
@@ -46,21 +78,29 @@ export class Group extends BaseElement {
             return null; // No children, no bounding box
         }
 
-        // If no transformation, return the base bbox directly
+        // Apply padding to the base bounding box
+        const paddedBbox = {
+            x: bbox.x - this.padding.left,
+            y: bbox.y - this.padding.top,
+            width: bbox.width + this.padding.left + this.padding.right,
+            height: bbox.height + this.padding.top + this.padding.bottom
+        };
+
+        // If no transformation, return the padded bbox directly
         if (this.angle === 0 && this.tx === 0 && this.ty === 0) {
-            return bbox;
+            return paddedBbox;
         }
 
-        // Calculate the center of the untransformed bounding box
-        const cx = bbox.x + bbox.width / 2;
-        const cy = bbox.y + bbox.height / 2;
+        // Calculate the center of the padded untransformed bounding box
+        const cx = paddedBbox.x + paddedBbox.width / 2;
+        const cy = paddedBbox.y + paddedBbox.height / 2;
 
-        // Calculate corners of the untransformed bbox
+        // Calculate corners of the padded untransformed bbox
         const corners = [
-            { x: bbox.x, y: bbox.y },                     // Top-left
-            { x: bbox.x + bbox.width, y: bbox.y },         // Top-right
-            { x: bbox.x + bbox.width, y: bbox.y + bbox.height }, // Bottom-right
-            { x: bbox.x, y: bbox.y + bbox.height }         // Bottom-left
+            { x: paddedBbox.x, y: paddedBbox.y },                     // Top-left
+            { x: paddedBbox.x + paddedBbox.width, y: paddedBbox.y },         // Top-right
+            { x: paddedBbox.x + paddedBbox.width, y: paddedBbox.y + paddedBbox.height }, // Bottom-right
+            { x: paddedBbox.x, y: paddedBbox.y + paddedBbox.height }         // Bottom-left
         ];
 
         // Apply rotation (around center cx, cy) and translation (tx, ty) to corners
@@ -125,9 +165,10 @@ export class Group extends BaseElement {
 
         let rotatePart = '';
         if (this.angle !== 0) {
-            // Rotation requires the center of the untransformed bbox
+            // Rotation requires the center of the untransformed bbox (without padding)
             const bbox = super.getBoundingBox(); // Get untransformed bbox again
             if (bbox) {
+                // We rotate around the center of the original bbox (without padding)
                 const cx = bbox.x + bbox.width / 2;
                 const cy = bbox.y + bbox.height / 2;
                 rotatePart = `rotate(${this.angle} ${cx} ${cy})`;

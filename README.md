@@ -94,6 +94,26 @@ Open a [pull request](https://github.com/splitbrain/pinoutleaf/pulls) or [ticket
    ```
 5. The tool will generate corresponding `.svg` files (e.g., `config.front.svg`, `config.back.svg`) in the same directory as the input files.
 
+### Local Setup
+
+If you want to run the web editor locally, you have two options:
+
+1. **Using Node.js:**
+   - Clone the repository.
+   - Install dependencies:
+     ```bash
+     npm install
+     ```
+   - Start a local server:
+     ```bash
+     npm run serve
+     ```
+   - Open your browser and navigate to `http://localhost:8080`.
+2. **Use your own web server and prebuilt sources:**
+   - Copy the [gh-pages](https://github.com/splitbrain/pinoutleaf/tree/gh-pages) branch to your web server document root.
+
+Please note that for both cases, because of CORS, images will not be embedded into the SVG files, an error will be logged to the console, and the images will be linked instead. This is not a problem when using the CLI tool or using the online editor.
+
 ## Configuration Syntax
 
 Diagrams are configured using YAML or JSON files. Most things have sensible defaults.

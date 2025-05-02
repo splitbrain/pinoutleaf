@@ -1,0 +1,76 @@
+---
+title: "M5 Stamp Pico v1.0"
+
+width: 8
+height: 9
+
+types:
+  control:
+    label: "System Control"
+    bgcolor: "#ffaaaa"
+    fgcolor: "#000000"
+  uart_default:
+    label: "UART"
+    bgcolor: "#0"
+    fgcolor: "#ffffff"
+  i2c_default:
+    label: "I2C"
+    bgcolor: "#00aabb"
+    fgcolor: "#ffffff"
+  spi_default:
+    label: "SPI default"
+    bgcolor: "#9900ff"
+    fgcolor: "#ffffff"
+  dac:
+    label: "DAC"
+    bgcolor: "#ffff00"
+    fgcolor: "#000000"
+
+image:
+  front:
+    src: "https://raw.githubusercontent.com/marcteale/pinoutleaf/refs/heads/m5-stamp-pico/public/pinouts/m5-stamp-pico.front.png"
+    grayscale: false
+    opacity: 0.25
+    left: 25
+    top: -40
+    right: -20
+    bottom: -40
+  back:
+    src: "https://raw.githubusercontent.com/marcteale/pinoutleaf/refs/heads/m5-stamp-pico/public/pinouts/m5-stamp-pico.back.png"
+    grayscale: false
+    opacity: 0.25
+    left: 50
+    top: -20
+    right: 40
+    bottom: -30
+pins:
+  left:
+    - ["GPIO26:gpio", "MOSI:spi", "DAC2:dac"]
+    - ["GPIO36:gpio", "MISO:spi", "ADC:analog"]
+    - ["GPIO18:gpio", "SCK:spi"]
+    - ["GPIO19:gpio", "CS:spi"]
+    - ["GPIO21:gpio", "SDA:i2c_default"]
+    - ["GPIO22:gpio", "SCL:i2c_default"]
+    - ["GPIO25:gpio", "DAC1:dac"]
+    - ["5V:power"]
+    - ["GND:gnd"]
+
+  right:
+    -
+    -
+    -
+    - ["3v3:power"]
+    - ["GPIO1:gpio", "Tx0:uart"]
+    - ["GPIO3:gpio", "Rx0:uart"]
+    - ["EN:control"]
+    - ["GPIO0:gpio"]
+    - ["GND:gnd"]
+
+  bottom:
+    -
+    -
+    - ["GND:gnd"]
+    - ["5V:power"]
+    - ["GPIO32:gpio", "ADC:analog"]
+    - ["GPIO33:gpio", "ADC:analog"]
+    -

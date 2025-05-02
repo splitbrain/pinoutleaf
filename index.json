@@ -1,6 +1,7 @@
 {
   "pinouts/a4988.yaml": "A4988 Motor Driver",
   "pinouts/esp32-c3-super-mini.yaml": "ESP32 C3 Super Mini",
+  "pinouts/m5-stamp-pico.yaml": "M5 Stamp Pico v1.0",
   "pinouts/raspberry-pi-pico.yaml": "Raspberry Pi Pico",
   "pinouts/raspberry-pi.yaml": "Raspberry Pi"
 }

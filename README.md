@@ -38,7 +38,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 
 ## Limits
 
-  * Only four rows of pins are supported.
+  * Only four rows of pins are supported (left, right, top, bottom).
   * No weird arbitrary layouts.
   * Only the standard 0.1-inch pin raster is supported (might change in the future).
 

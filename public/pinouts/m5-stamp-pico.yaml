@@ -28,7 +28,7 @@ types:
 
 image:
   front:
-    src: "https://raw.githubusercontent.com/marcteale/pinoutleaf/refs/heads/m5-stamp-pico/public/pinouts/m5-stamp-pico.front.png"
+    src: "m5-stamp-pico.front.png"
     grayscale: false
     opacity: 0.25
     left: 25
@@ -36,7 +36,7 @@ image:
     right: -20
     bottom: -40
   back:
-    src: "https://raw.githubusercontent.com/marcteale/pinoutleaf/refs/heads/m5-stamp-pico/public/pinouts/m5-stamp-pico.back.png"
+    src: "m5-stamp-pico.back.png"
     grayscale: false
     opacity: 0.25
     left: 50

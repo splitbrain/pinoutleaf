@@ -1,0 +1,50 @@
+title: "DFPlayer Mini"
+
+width: 8
+height: 8
+
+image:
+  front:
+    src: "dfplayer-mini.front.png"
+  back:
+    src: "dfplayer-mini.back.png"
+
+pins:
+  left:
+    - [ "VCC:power" ]
+    - [ "RX:uart" ]
+    - [ "TX:uart" ]
+    - [ "DACR:audio" ]
+    - [ "DACL:audio" ]
+    - [ "SPK+:speaker"]
+    - [ "GND:gnd" ]
+    - [ "SPK-:speaker"]
+  right:
+    - [ "BUSY:sig" ]
+    - [ "USB-:usb" ]
+    - [ "USB+:usb" ]
+    - [ "ADKEY2:trigger" ]
+    - [ "ADKEY1:trigger" ]
+    - [ "IO2:trigger"]
+    - [ "GND:gnd" ]
+    - [ "IO1:trigger"]
+
+types:
+  trigger:
+    label: 'Trigger'
+    bgcolor: '#79bc3c'
+    fgcolor: '#ffffff'
+  speaker:
+    label: 'Speaker'
+    bgcolor: '#3399dd'
+    fgcolor: '#ffffff'
+  audio:
+    label: 'Audio'
+    bgcolor: '#f3c609'
+  usb:
+    label: 'USB'
+    bgcolor: '#a3b8cb'
+  sig:
+    label: 'Status'
+    bgcolor: '#e7a2f2'
+

@@ -1,0 +1,82 @@
+title: "Lolin32 lite"
+
+# dimensions counted in pins
+width: 10
+height: 13
+
+
+# images can be URLs, use adjustments to fit the pins
+image:
+  front:
+    src: "lolin32-lite.front.png"
+    top: -600
+    left: 0
+    right: 0
+    bottom: -1100
+  back:
+    src: "lolin32-lite.back.png"
+    top: -600
+    left: 0
+    right: 0
+    bottom: -1100
+
+# Define the pins (label:type), use empty entries when offsets are needed
+pins:
+  left:
+    - [ "GPIO36:gpio-in", "ADC1-0:analog", "RTC-0:rtc" ]
+    - [ "GPIO39:gpio-in", "ADC1-3:analog", "RTC-3:rtc" ]
+    - [ "RESET" ]
+    - [ "GPIO34:gpio-in", "ADC1-6:analog", "RTC-4:rtc" ]
+    - [ "GPIO35:gpio-in", "ADC1-5:analog", "RTC-5:rtc" ]
+    - [ "GPIO32:gpio", "ADC1-4:analog", "Touch9:touch", "RTC-9:rtc" ]
+    - [ "GPIO33:gpio", "ADC1-5:analog", "Touch8:touch", "RTC-8:rtc" ]
+    - [ "GPIO25:gpio", "ADC2-8:analog", "DAC1:dac", "RTC-6:rtc" ]
+    - [ "GPIO26:gpio", "ADC2-9:analog", "DAC2:dac", "RTC-7:rtc"]
+    - [ "GPIO27:gpio", "ADC2-7:analog", "Touch7:touch", "RTC-17:rtc"]
+    - [ "GPIO14:gpio", "ADC2-6:analog", "Touch 6:touch", "RTC-16:rtc", "SD CLK:sd", "HSPICL:hspi"]
+    - [ "GPIO12:gpio", "ADC2-5:analog", "Touch 5:touch", "RTC-15:rtc", "SD D2:sd", "HSPIQ:hspi"]
+    - [ "GND:gnd"]
+  right:
+    - [ "3.3V:power" ]
+    - [ "GPIO22:gpio", LED ]
+    - [ "GPIO19:gpio", "MISO:spi" ]
+    - [ "GPIO23:gpio", "MOSI:spi" ]
+    - [ "GPIO18:gpio", "CLK:spi" ]
+    - [ "GPIO05:gpio", "SS:spi" ]
+    - [ "GPIO17:gpio", "TX:uart" ]
+    - [ "GPIO16:gpio", "RX:uart" ]
+    - [ "GPIO04:gpio", "ADC2-0:analog", "Touch0:touch", "RTC-10:rtc", "I2C1 CL:i2c", "SD D1:sd", "HSPIHD:hspi"]
+    - [ "GPIO00:gpio", "ADC2-1:analog", "Touch1:touch", "RTC-11:rtc", "I2C1 DA:i2c"]
+    - [ "GPIO02:gpio", "ADC2-2:analog", "Touch2:touch", "RTC-12:rtc", "I2C2 CL:i2c", "SD D0:sd", "HSPIWP:hspi"]
+    - [ "GPIO15:gpio", "ADC2-3:analog", "Touch3:touch", "RTC-13:rtc", "I2C2 DA:i2c", "SD CMD:sd", "HSPICS:hspi"]
+    - [ "GPIO13:gpio", "ADC2-4:analog", "RTC-14:rtc", "SD D3:sd", "HSPID:hspi"]
+
+
+
+
+types:
+  gpio-in:
+    label: 'GPIO Input'
+    bgcolor: '#5b9821'
+    fgcolor: '#ffffff'
+  gpio:
+    label: 'GPIO In/Out/PWM'
+    bgcolor: '#79bc3c'
+    fgcolor: '#ffffff'
+  rtc:
+    label: 'RTC IO'
+    bgcolor: '#3399dd'
+    fgcolor: '#ffffff'
+  touch:
+    label: 'Capacitive Touch'
+    bgcolor: '#e7a2f2'
+  sd:
+    label: 'SD Card'
+    bgcolor: '#ffee5b'
+  hspi:
+    label: 'HSPI Bus'
+    bgcolor: '#a3b8cb'
+  dac:
+    label: 'Analog 8bit'
+    bgcolor: '#f3c609'
+

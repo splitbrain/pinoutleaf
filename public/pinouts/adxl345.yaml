@@ -1,0 +1,23 @@
+title: "ADXL345"
+
+width: 6
+height: 8
+
+image:
+  front:
+    src: "adxl345.front.png"
+    top: -30
+    left: -40
+    bottom: 20
+
+pins:
+  left:
+    - [ "GND:gnd" ]
+    - [ "VCC:power" ]
+    - [ "CS" ]
+    - [ "INT1" ]
+    - [ "INT2" ]
+    - [ "SDO:i2c",  "MISO:spi" ]
+    - [ "SDA:i2c", "MOSI:spi"]
+    - [ "SCL:i2c", "SCK:spi"]
+

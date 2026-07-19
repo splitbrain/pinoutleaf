@@ -1,0 +1,34 @@
+title: "ATtiny85"
+
+# An 8-pin DIP: two columns of four pins (height).
+# Notice that width and height are not given, they are automatically calculated from the number of pins defined.
+# Using `variant: chip` draws the black IC body with silver legsn instead of the default PCB rectangle (no background image needed).
+variant: chip
+pinNumbers: auto
+
+# Width is auto-calculated as 2, but 3 looks nicer, so we set it.
+width: 3
+
+pins:
+  # left column, top to bottom: physical pins 1-4
+  left:
+    - [ "PB5:gpio", "RESET:control", "ADC0:analog", "dW:control" ]
+    - [ "PB3:gpio", "XTAL1:control", "ADC3:analog" ]
+    - [ "PB4:gpio", "XTAL2:control", "ADC2:analog" ]
+    - [ "GND:gnd" ]
+  # right column, top to bottom: physical pins 8-5
+  right:
+    - [ "VCC:power" ]
+    - [ "PB2:gpio", "SCK:spi", "SCL:i2c", "ADC1:analog", "INT0:control" ]
+    - [ "PB1:gpio", "MISO:spi", "OC0B:pwm" ]
+    - [ "PB0:gpio", "MOSI:spi", "SDA:i2c", "OC0A:pwm", "AREF:analog" ]
+
+types:
+  control:
+    label: "Control"
+    bgcolor: "#637181"
+    fgcolor: "#ffffff"
+  pwm:
+    label: "PWM"
+    bgcolor: "#e38022"
+    fgcolor: "#ffffff"

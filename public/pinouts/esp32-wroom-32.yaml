@@ -1,0 +1,73 @@
+title: "ESP32-WROOM-32 (Module)"
+
+# The ESP32-WROOM-32 module itself (not a devkit breakout board).
+# Pin numbering nd signal names follow:
+# https://lastminuteengineers.com/esp32-wroom-32-pinout-reference/
+width: 10
+height: 14
+variant: chip
+pinNumbers: auto
+
+pins:
+  # left edge, top to bottom: pads 1-14
+  left:
+    - [ "GND:gnd" ]                                                    # pad 1
+    - [ "3V3:power" ]                                                  # pad 2
+    - [ "EN:control" ]                                                 # pad 3
+    - [ "GPIO36:gpio", "VP:analog" ]                                   # pad 4
+    - [ "GPIO39:gpio", "VN:analog" ]                                   # pad 5
+    - [ "GPIO34:gpio", "ADC1_6:analog" ]                               # pad 6
+    - [ "GPIO35:gpio", "ADC1_7:analog" ]                               # pad 7
+    - [ "GPIO32:gpio", "ADC1_4:analog", "T9:touch" ]                   # pad 8
+    - [ "GPIO33:gpio", "ADC1_5:analog", "T8:touch" ]                   # pad 9
+    - [ "GPIO25:gpio", "ADC2_8:analog", "DAC1:dac" ]                   # pad 10
+    - [ "GPIO26:gpio", "ADC2_9:analog", "DAC2:dac" ]                   # pad 11
+    - [ "GPIO27:gpio", "ADC2_7:analog", "T7:touch" ]                   # pad 12
+    - [ "GPIO14:gpio", "ADC2_6:analog", "T6:touch", "HSPI_CLK:spi" ]   # pad 13
+    - [ "GPIO12:gpio", "ADC2_5:analog", "T5:touch", "HSPI_MISO:spi" ]  # pad 14
+  # left edge, left to right: pads 15-24
+  bottom:
+    - [ "GND:gnd" ]                                                    # pad 15
+    - [ "GPIO13:gpio", "ADC2_4:analog", "T4:touch", "HSPI_MOSI:spi" ]  # pad 16
+    - [ "GPIO9:flash", "SD2:flash" ]                                   # pad 17
+    - [ "GPIO10:flash", "SD3:flash" ]                                  # pad 18
+    - [ "GPIO11:flash", "CMD:flash" ]                                  # pad 19
+    - [ "GPIO6:flash", "CLK:flash" ]                                   # pad 20
+    - [ "GPIO7:flash", "SD0:flash" ]                                   # pad 21
+    - [ "GPIO8:flash", "SD1:flash" ]                                   # pad 22
+    - [ "GPIO15:gpio", "ADC2_3:analog", "T3:touch", "HSPI_CS:spi" ]    # pad 23
+    - [ "GPIO2:gpio", "ADC2_2:analog", "LED:control" ]                 # pad 24
+  # right edge, top to bottom: pads 38-25
+  right:
+    - [ "GND:gnd" ]                                                    # pad 38
+    - [ "GPIO23:gpio", "VSPI_MOSI:spi" ]                               # pad 37
+    - [ "GPIO22:gpio", "SCL:i2c" ]                                     # pad 36
+    - [ "GPIO1:gpio", "TX0:uart" ]                                     # pad 35
+    - [ "GPIO3:gpio", "RX0:uart" ]                                     # pad 34
+    - [ "GPIO21:gpio", "SDA:i2c" ]                                     # pad 33
+    - [ "GND:gnd" ]                                                    # pad 32
+    - [ "GPIO19:gpio", "VSPI_MISO:spi" ]                               # pad 31
+    - [ "GPIO18:gpio", "VSPI_CLK:spi" ]                                # pad 30
+    - [ "GPIO5:gpio", "VSPI_SS:spi" ]                                  # pad 29
+    - [ "GPIO17:gpio", "TX2:uart" ]                                    # pad 28
+    - [ "GPIO16:gpio", "RX2:uart" ]                                    # pad 27
+    - [ "GPIO4:gpio", "ADC2_0:analog", "T0:touch" ]                    # pad 26
+    - [ "GPIO0:gpio", "ADC2_1:analog", "BOOT:control" ]                # pad 25
+
+types:
+  control:
+    label: "Control"
+    bgcolor: "#637181"
+    fgcolor: "#ffffff"
+  dac:
+    label: "DAC"
+    bgcolor: "#8e44ad"
+    fgcolor: "#ffffff"
+  touch:
+    label: "Touch"
+    bgcolor: "#2980b9"
+    fgcolor: "#ffffff"
+  flash:
+    label: "Flash (avoid)"
+    bgcolor: "#b33939"
+    fgcolor: "#ffffff"

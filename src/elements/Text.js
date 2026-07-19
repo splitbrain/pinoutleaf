@@ -6,11 +6,11 @@ export class Text extends BaseElement {
     super('text', {
       x,
       y,
-      ...attrs,
       // align on top left corner
       'dominant-baseline': 'hanging',
       'font-family': 'Roboto Mono',
       'font-size': FONTSIZE,
+      ...attrs,
     });
     this.text = text;
   }

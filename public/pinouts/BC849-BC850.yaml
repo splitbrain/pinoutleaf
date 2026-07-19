@@ -1,0 +1,19 @@
+title: "BC849; BC850 (SOT23)"
+
+# BC849 and BC850 SOT23 transistors
+# Note that this is technically a 2x3 package, but these have "missing" pins.
+# You can define an empty (- []) pin to indicate this.
+# legend: none, these simple chips don't need a legend
+variant: chip
+pinNumbers: auto
+legend: none
+
+pins:
+  left:
+    - ["base"]
+    - []
+    - ["emitter"]
+  right:
+    - []
+    - ["collector"]
+    - []

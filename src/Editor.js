@@ -38,7 +38,8 @@ export class Editor {
             highlightActiveLine: true,
             highlightSelectedWord: false,
             useWrapMode: true,
-            tabSize: 2
+            tabSize: 2,
+            useWorker: false
         });
 
         this.initializeEditor();
@@ -158,13 +159,13 @@ export class Editor {
 
         const builder = new Builder(setup);
 
-        const front = builder.build().render(window.document);
+        const front = builder.build();
         builder.flip();
-        const back = builder.build().render(window.document);
+        const back = builder.build();
 
         this.output.innerHTML = '';
-        this.output.appendChild(front);
-        this.output.appendChild(back);
+        if(front) this.output.appendChild(front.render(window.document));
+        if(back) this.output.appendChild(back.render(window.document));
     }
 
     /**

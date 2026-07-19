@@ -1,0 +1,21 @@
+title: "ILC6390/91 (SOT-89-5)"
+
+# ILC6390/91 SOT-89-5 Step-Up PFM Switcher
+# A SOT-89-5 package is an example of where we cant use auto-numbering"
+# The location of pin nr 5 on the right hand side is actually the same
+# as pin nr 2, they are electrically connected at the underside of the package.
+# We can use the "firstLabel" option for manually labelling here.
+# Note that if you need to manually label 1 pin, you need to label all of them.
+variant: chip
+pinNumbers: firstLabel
+legend: none
+
+pins:
+  left:
+    - [ "1", "N/C"]
+    - [ "2", "Vout"]
+    - [ "3", "CE"]
+  right:
+    - [ "5", "Vss"]
+    - [ "2", "Vout"]
+    - [ "4", "Lx"]

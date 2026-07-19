@@ -32,6 +32,10 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Front & Back Views:**
   * Automatically generates diagrams for both the front and back sides of the PCB.
 
+* **Chip Diagrams:**
+  * Besides PCBs, you can also render a chip/IC package (black body, silver leads, pin-1 marker) — handy for documenting a module or IC by itself instead of a whole board.
+  * Optional automatic or physical pin numbering printed directly on the leads.
+
 ## Screenshot
 
 ![Screenshot](screenshot.png)
@@ -41,6 +45,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Only four rows of pins are supported (left, right, top, bottom).
   * No weird arbitrary layouts.
   * Only the standard 0.1-inch pin raster is supported (might change in the future).
+  * Chip diagrams only ever show the front — there's no back side to a chip.
 
 ## Alternatives
 
@@ -128,14 +133,50 @@ Defines the title of the diagram:
 title: "My PCB"
 ```
 
+### variant
+
+There are two diagram variants: `pcb` (the default) and `chip`.
+
+```yaml
+variant: chip
+```
+
+* `pcb` draws the standard green PCB background (or your own background image, see [image](#image)) and generates both a front and a back view.
+* `chip` draws a black IC body with silver leads instead, and only ever generates a front view — flipping is a no-op since a chip has no back side. If a chip has pins on both a vertical side (left/right) and a horizontal side (top/bottom), the body is automatically grown by one empty pin position on every edge so that corner leads don't overlap.
+
 ### size
 
-The size of the PCB is defined in the number of pins (assuming a standard pin raster of 0.1 inch, aka 2.54mm). Everything else is derived from this size. Best to put your board on a breadboard and count.
+The size of the PCB or chip is defined in the number of pins (assuming a standard pin raster of 0.1 inch, aka 2.54mm). Everything else is derived from this size. Best to put your board on a breadboard and count.
 
 ```yaml
 width: 4
 height: 6
 ```
+
+Both are optional — if omitted, they're calculated automatically from the number of pins you define in the `top`/`bottom` rows (for `width`) and `left`/`right` rows (for `height`).
+
+### pinNumbers
+
+For `chip` diagrams, you can have the physical pin number printed on each lead using the `pinNumbers` option. It has no effect on `pcb` diagrams.
+
+```yaml
+pinNumbers: auto
+```
+
+* `none` (the default) — no pin numbers are shown.
+* `auto` — pins are numbered 1-based, starting at the first pin of the `left` row and proceeding down the left side, across the bottom, up the right side, and across the top. Empty pin positions don't count towards the numbering.
+* `firstLabel` — instead of calculating a number, the first `label:type` entry of each pin is used as its pin number (parsed as an integer) and is not rendered as a regular label. Useful when your pin numbers aren't sequential or don't start at 1.
+
+### legend
+
+The legend isthe box explaining what each color/type means. You can turn it off if you like:
+
+```yaml
+legend: none
+```
+
+* `auto` (the default) — the legend is shown.
+* `none` — the legend is hidden.
 
 ### pins
 

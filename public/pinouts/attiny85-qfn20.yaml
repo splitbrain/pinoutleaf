@@ -1,0 +1,51 @@
+title: "ATtiny85 (QFN/MLF-20)"
+
+# 20-pin QFN/MLF package: 5 pins per side. Only 8 of the 20 pads carry a
+# signal - the rest are DNC (Do Not Connect), labeled as such below.
+# `pinNumbers: auto` prints the physical pad number next to every pin.
+variant: chip
+pinNumbers: auto
+
+pins:
+  # left column, top to bottom: pads 1-5
+  left:
+    - [ "PB5:gpio", "RESET:control", "ADC0:analog", "dW:control" ] # pad 1
+    - [ "PB3:gpio", "XTAL1:control", "ADC3:analog" ]               # pad 2
+    - [ "DNC:dnc" ]                                                # pad 3
+    - [ "DNC:dnc" ]                                                # pad 4
+    - [ "PB4:gpio", "XTAL2:control", "ADC2:analog" ]               # pad 5
+  # bottom row, left to right: pads 6-10
+  bottom:
+    - [ "DNC:dnc" ]  # pad 6
+    - [ "DNC:dnc" ]  # pad 7
+    - [ "GND:gnd" ]  # pad 8
+    - [ "DNC:dnc" ]  # pad 9
+    - [ "DNC:dnc" ]  # pad 10
+  # right column, top to bottom: pads 15-11
+  right:
+    - [ "VCC:power" ]                                                     # pad 15
+    - [ "PB2:gpio", "SCK:spi", "SCL:i2c", "ADC1:analog", "INT0:control" ] # pad 14
+    - [ "DNC:dnc" ]                                                       # pad 13
+    - [ "PB1:gpio", "MISO:spi", "OC0B:pwm" ]                              # pad 12
+    - [ "PB0:gpio", "MOSI:spi", "SDA:i2c", "OC0A:pwm", "AREF:analog" ]    # pad 11
+  # top row, left to right: pads 20-16
+  top:
+    - [ "DNC:dnc" ] # pad 20
+    - [ "DNC:dnc" ] # pad 19
+    - [ "DNC:dnc" ] # pad 18
+    - [ "DNC:dnc" ] # pad 17
+    - [ "DNC:dnc" ] # pad 16
+
+types:
+  control:
+    label: "Control"
+    bgcolor: "#637181"
+    fgcolor: "#ffffff"
+  pwm:
+    label: "PWM"
+    bgcolor: "#e38022"
+    fgcolor: "#ffffff"
+  dnc:
+    label: "Do Not Connect"
+    bgcolor: "#999999"
+    fgcolor: "#ffffff"

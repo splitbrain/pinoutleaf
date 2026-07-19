@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "serve",
+            "type": "npm",
+            "script": "serve",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^(Error|Warning): (.*)$",
+                    "severity": 1,
+                    "message": 2
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^Generating pinout index",
+                    "endsPattern": "^Serving on http://localhost:8000"
+                }
+            }
+        }
+    ]
+}

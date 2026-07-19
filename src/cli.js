@@ -73,14 +73,20 @@ async function processFile(file) {
     const builder = new Builder(setup);
     const window = createWindow();
 
-    const frontSvgContent = builder.build().render(window.document).outerHTML;
-    await writeFile(outputBase + '.front.svg', frontSvgContent, 'utf8');
-    console.info(outputBase + '.front.svg written');
+    const frontSvg = builder.build();
+    if(frontSvg) {
+        const frontSvgContent = frontSvg.render(window.document).outerHTML;
+        await writeFile(outputBase + '.front.svg', frontSvgContent, 'utf8');
+        console.info(outputBase + '.front.svg written');
+    }
 
     builder.flip();
-    const backSvgContent = builder.build().render(window.document).outerHTML;
-    await writeFile(outputBase + '.back.svg', backSvgContent, 'utf8');
-    console.info(outputBase + '.back.svg written');
+    const backSvg = builder.build();
+    if(backSvg) {
+        const backSvgContent = backSvg.render(window.document).outerHTML;
+        await writeFile(outputBase + '.back.svg', backSvgContent, 'utf8');
+        console.info(outputBase + '.back.svg written');
+    }
 }
 
 /**

@@ -32,15 +32,18 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Front & Back Views:**
   * Automatically generates diagrams for both the front and back sides of the PCB.
 
+* **Photo First Layouts:**
+  * Start with a photo of your PCB and place pin headers on it by clicking their first and last hole.
+  * The pin pitch is used to derive the real-world scale, no fiddling with image offsets.
+
 ## Screenshot
 
 ![Screenshot](screenshot.png)
 
 ## Limits
 
-  * Only four rows of pins are supported (left, right, top, bottom).
-  * No weird arbitrary layouts.
-  * Only the standard 0.1-inch pin raster is supported (might change in the future).
+  * Grid layouts: only four rows of pins are supported (left, right, top, bottom) on the standard 0.1-inch raster.
+  * Photo first layouts: pins within a header are equally spaced along a straight line. Labels always point left, right, up or down.
 
 ## Alternatives
 
@@ -68,6 +71,45 @@ Feel free to open an issue when you create a new pinout leaf and we can add it t
 Check the [pinouts](https://github.com/splitbrain/pinoutleaf/tree/gh-pages/pinouts) directory for boards that have already been defined.
 
 Open a [pull request](https://github.com/splitbrain/pinoutleaf/pulls) or [ticket](https://github.com/splitbrain/pinoutleaf/issues) if you made one and want it included in the repo.
+
+### Photo First Layouts
+
+Instead of describing a pin grid and nudging the image until it matches, you can start with a photo and place the pins on it. Use `headers` instead of `width`, `height`, `offsets` and `pins`:
+
+```yaml
+title: "SIM7080G Module"
+
+image:
+  front:
+    src: "SIM7080G-front-pcb.png"
+
+headers:
+  - start: [ 672, 1682 ]   # pixel position of the first hole on the image
+    end: [ 657, 2550 ]     # pixel position of the last hole
+    pins:
+      - [ "DTR:uart" ]
+      - [ "PWR" ]
+      - [ "RTS:uart" ]
+      - [ ]                # a hole without labels
+      - [ ]
+      - [ ]
+      - [ "3V3:power" ]
+      - [ "GND:gnd" ]
+```
+
+1. Set the front image and add a header with its `start` and `end`.
+2. In the web editor, check **📍 Pick coordinates**, put the editor cursor where the coordinates should go and click the hole on the photo. The pixel coordinates are inserted for you.
+3. Add as many entries to `pins` as the header has holes. The holes are spaced equally between `start` and `end`.
+4. Label the pins just like in grid layouts.
+
+Things to know:
+
+* The distance between the holes and the pin pitch determine the scale of the photo. Until a header with at least two pins exists, the diagram is marked as *not to scale*.
+* `pitch` sets the pin spacing in mm, either globally or per header. It defaults to `2.54`.
+* `count` sets the number of holes when you don't want to list every pin yet.
+* Use `null` (an empty list item) instead of `[ ]` to skip a hole.
+* `side` (`left`, `right`, `top`, `bottom`) sets where labels are drawn. It is guessed from the header's position when omitted and mirrored for the back view.
+* A back photo is centered at the front image's scale. Without a back image, the front photo is mirrored for the back view.
 
 ### Printing
 

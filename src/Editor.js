@@ -17,14 +17,23 @@ export class Editor {
     ace;
     /** @type {HTMLElement} The HTML element where the SVG output is rendered. */
     output;
+    /** @type {HTMLInputElement|null} Checkbox enabling the coordinate picker. */
+    pickToggle;
+    /** @type {HTMLElement|null} Element showing the coordinates under the mouse. */
+    pickStatus;
 
     /**
      * Creates an Editor instance.
      * @param {string|HTMLElement} editor - The ID or HTML element for the Ace editor container.
      * @param {HTMLElement} output - The HTML element to render the SVG output into.
+     * @param {object} [controls] - Optional UI controls.
+     * @param {HTMLInputElement|null} [controls.pickToggle] - Checkbox to switch clicks from downloading to picking image coordinates.
+     * @param {HTMLElement|null} [controls.pickStatus] - Element to show the image coordinates under the mouse in.
      */
-    constructor(editor, output) {
+    constructor(editor, output, {pickToggle = null, pickStatus = null} = {}) {
         this.output = output;
+        this.pickToggle = pickToggle;
+        this.pickStatus = pickStatus;
 
         this.ace = ace.edit(editor);
         this.ace.setTheme("ace/theme/github");
@@ -42,7 +51,12 @@ export class Editor {
         });
 
         this.initializeEditor();
-        this.output.addEventListener('click', this.onDownloadClick);
+        this.output.addEventListener('click', this.onOutputClick.bind(this));
+        this.output.addEventListener('mousemove', this.onOutputMove.bind(this));
+        this.pickToggle?.addEventListener('change', () => {
+            this.output.classList.toggle('picking', this.pickToggle.checked);
+            if (this.pickStatus) this.pickStatus.textContent = '';
+        });
     }
 
     /**
@@ -156,7 +170,17 @@ export class Editor {
         const embed = new ImageEmbed('pinouts'); // Assuming 'pinouts' is the base path for local images
         setup = await embed.embedImages(setup);
 
-        const builder = new Builder(setup);
+        let builder;
+        try {
+            builder = new Builder(setup);
+        } catch (e) {
+            this.output.innerHTML = '';
+            const error = document.createElement('div');
+            error.className = 'error';
+            error.textContent = e.message;
+            this.output.appendChild(error);
+            return;
+        }
 
         const front = builder.build().render(window.document);
         builder.flip();
@@ -165,6 +189,63 @@ export class Editor {
         this.output.innerHTML = '';
         this.output.appendChild(front);
         this.output.appendChild(back);
+    }
+
+    /**
+     * Whether clicks on the output pick image coordinates instead of downloading
+     * @returns {boolean}
+     * @private
+     */
+    isPicking() {
+        return !!this.pickToggle?.checked;
+    }
+
+    /**
+     * Converts the mouse position into pixel coordinates of the PCB photo below it.
+     *
+     * Only works for layouts using headers, where the photo is rendered in its pixel coordinates.
+     *
+     * @param {MouseEvent} e
+     * @returns {{x: number, y: number, side: string}|null}
+     * @private
+     */
+    photoCoordinates(e) {
+        const photo = e.target.closest('svg')?.querySelector('.pcb-photo');
+        const matrix = photo?.getScreenCTM();
+        if (!matrix) return null;
+
+        const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse());
+        return {
+            x: Math.round(point.x),
+            y: Math.round(point.y),
+            side: photo.getAttribute('data-side'),
+        };
+    }
+
+    /**
+     * Shows the photo coordinates under the mouse while picking
+     * @param {MouseEvent} e
+     * @private
+     */
+    onOutputMove(e) {
+        if (!this.isPicking() || !this.pickStatus) return;
+        const coords = this.photoCoordinates(e);
+        this.pickStatus.textContent = coords ? `${coords.side} image: [${coords.x}, ${coords.y}]` : '';
+    }
+
+    /**
+     * Inserts the clicked photo coordinates at the editor cursor while picking, downloads the SVG otherwise
+     * @param {MouseEvent} e
+     * @private
+     */
+    onOutputClick(e) {
+        if (!this.isPicking()) {
+            this.onDownloadClick(e);
+            return;
+        }
+        const coords = this.photoCoordinates(e);
+        if (!coords) return;
+        this.ace.insert(`[ ${coords.x}, ${coords.y} ]`);
     }
 
     /**

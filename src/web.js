@@ -6,7 +6,11 @@ import {Editor} from "./Editor.js";
 
     const editor = new Editor(
         document.getElementById('editor'),
-        document.getElementById('output')
+        document.getElementById('output'),
+        {
+            pickToggle: document.getElementById('pick-toggle'),
+            pickStatus: document.getElementById('pick-status'),
+        }
     );
 
 

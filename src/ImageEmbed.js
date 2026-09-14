@@ -1,3 +1,5 @@
+import {imageSize} from "./ImageSize.js";
+
 // Basic environment detection
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
 
@@ -66,6 +68,17 @@ export class ImageEmbed {
                 console.warn(`Failed to embed image "${item.originalSrc}": ${result.reason?.message || result.reason}. Keeping original source.`);
             }
         });
+
+        // Photo layouts place everything in image pixel coordinates and need to know the image dimensions
+        await Promise.all(imageConfigsToProcess.map(async ({config}) => {
+            try {
+                const {width, height} = await imageSize(config.src);
+                config.naturalWidth = width;
+                config.naturalHeight = height;
+            } catch (e) {
+                console.warn(e.message);
+            }
+        }));
 
         return setup; // Return the modified setup object
     }

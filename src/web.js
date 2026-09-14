@@ -10,6 +10,7 @@ import {Editor} from "./Editor.js";
         {
             pickToggle: document.getElementById('pick-toggle'),
             pickStatus: document.getElementById('pick-status'),
+            grayscaleToggle: document.getElementById('grayscale-toggle'),
         }
     );
 

@@ -4,6 +4,7 @@ import 'ace-builds/src-noconflict/theme-github';
 import Yaml from 'yaml';
 import {Builder} from "./Builder.js";
 import { ImageEmbed } from "./ImageEmbed.js";
+import {imageOptionEdits} from "./YamlEdit.js";
 
 /**
  * Manages the Ace editor instance, handles YAML parsing,
@@ -21,6 +22,8 @@ export class Editor {
     pickToggle;
     /** @type {HTMLElement|null} Element showing the coordinates under the mouse. */
     pickStatus;
+    /** @type {HTMLInputElement|null} Checkbox switching the PCB images between grayscale and color. */
+    grayscaleToggle;
 
     /**
      * Creates an Editor instance.
@@ -29,11 +32,13 @@ export class Editor {
      * @param {object} [controls] - Optional UI controls.
      * @param {HTMLInputElement|null} [controls.pickToggle] - Checkbox to switch clicks from downloading to picking image coordinates.
      * @param {HTMLElement|null} [controls.pickStatus] - Element to show the image coordinates under the mouse in.
+     * @param {HTMLInputElement|null} [controls.grayscaleToggle] - Checkbox to switch the images between grayscale and color.
      */
-    constructor(editor, output, {pickToggle = null, pickStatus = null} = {}) {
+    constructor(editor, output, {pickToggle = null, pickStatus = null, grayscaleToggle = null} = {}) {
         this.output = output;
         this.pickToggle = pickToggle;
         this.pickStatus = pickStatus;
+        this.grayscaleToggle = grayscaleToggle;
 
         this.ace = ace.edit(editor);
         this.ace.setTheme("ace/theme/github");
@@ -57,6 +62,7 @@ export class Editor {
             this.output.classList.toggle('picking', this.pickToggle.checked);
             if (this.pickStatus) this.pickStatus.textContent = '';
         });
+        this.grayscaleToggle?.addEventListener('change', this.onGrayscaleToggle.bind(this));
     }
 
     /**
@@ -143,6 +149,7 @@ export class Editor {
                 prettyErrors: true,
             });
             localStorage.setItem(this.STORAGE_KEY, yaml);
+            this.updateImageControls(parsed);
             this.onUpdate(parsed);
             this.clearErrors();
         } catch (e) {
@@ -189,6 +196,65 @@ export class Editor {
         this.output.innerHTML = '';
         this.output.appendChild(front);
         this.output.appendChild(back);
+    }
+
+    /**
+     * Reflects the image settings of the configuration in the image controls
+     *
+     * The grayscale toggle is checked when all images are grayscale (the default), indeterminate
+     * when front and back differ and disabled when there are no images.
+     *
+     * @param {object} setup - The parsed YAML configuration object.
+     * @private
+     */
+    updateImageControls(setup) {
+        const images = ['front', 'back']
+            .map(side => setup?.image?.[side])
+            .filter(image => image?.src);
+
+        if (this.grayscaleToggle) {
+            const grayscale = images.map(image => Boolean(image.grayscale ?? true));
+            this.grayscaleToggle.disabled = images.length === 0;
+            this.grayscaleToggle.checked = grayscale.length > 0 && grayscale.every(Boolean);
+            this.grayscaleToggle.indeterminate = grayscale.some(Boolean) && !grayscale.every(Boolean);
+        }
+    }
+
+    /**
+     * Sets the grayscale option of all images in the YAML
+     * @private
+     */
+    onGrayscaleToggle() {
+        if (!this.setImageOption('grayscale', this.grayscaleToggle.checked)) {
+            this.grayscaleToggle.checked = !this.grayscaleToggle.checked; // can't edit broken YAML, undo the click
+        }
+    }
+
+    /**
+     * Sets an option of all images in the YAML
+     *
+     * Only the affected lines are changed, so formatting, comments and undo history are kept.
+     *
+     * @param {string} option
+     * @param {boolean|number} value
+     * @returns {boolean} false if the YAML could not be edited
+     * @private
+     */
+    setImageOption(option, value) {
+        const session = this.ace.session;
+        let edits;
+        try {
+            edits = imageOptionEdits(session.getValue(), option, value);
+        } catch (e) {
+            return false;
+        }
+
+        for (const edit of edits) {
+            const start = session.doc.indexToPosition(edit.start);
+            const end = session.doc.indexToPosition(edit.end);
+            session.replace({start, end}, edit.text);
+        }
+        return true;
     }
 
     /**

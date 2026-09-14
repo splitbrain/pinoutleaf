@@ -88,6 +88,7 @@ export class Editor {
      */
     async initializeEditor() {
         await this.loadInitialContent();
+        this.ace.session.getUndoManager().reset(); // undo should not remove the loaded content
 
         this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
         if (this.ace.getValue()) {

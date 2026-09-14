@@ -38,10 +38,15 @@
             <a href="javascript:print()">🖨️ Click here to print them</a>.
         </p>
 
-        <p>
+        <p class="image-controls">
             <label>
                 <input type="checkbox" id="grayscale-toggle" checked disabled>
-                🎨 Grayscale images (uncheck to show the photos in their real colors)
+                🎨 Grayscale images
+            </label>
+            <label>
+                🌓 Image opacity
+                <input type="range" id="opacity-slider" min="0" max="100" step="5" value="50" disabled>
+                <output id="opacity-value"></output>
             </label>
         </p>
 

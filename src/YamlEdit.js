@@ -1,7 +1,7 @@
 import Yaml from 'yaml';
 
 /**
- * Calculates minimal text edits to set an option (like grayscale) of all images in a YAML configuration
+ * Calculates minimal text edits to set an option (like grayscale or opacity) of all images in a YAML configuration
  *
  * Rewriting the whole document would reformat the user's YAML, so only the option's values are
  * replaced, or a line for the option is inserted after the image's src.

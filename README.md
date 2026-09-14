@@ -25,7 +25,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Web Editor:**
   * Real-time preview of the diagram as you edit the configuration.
   * Syntax highlighting for YAML.
-  * Switch PCB images between grayscale and color (sets `grayscale` of the images in the YAML).
+  * Switch PCB images between grayscale and color and adjust their opacity with a slider (sets `grayscale` and `opacity` of the images in the YAML).
   * Download generated SVG diagrams.
 
 * **CLI Tool:**

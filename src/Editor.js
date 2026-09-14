@@ -24,6 +24,10 @@ export class Editor {
     pickStatus;
     /** @type {HTMLInputElement|null} Checkbox switching the PCB images between grayscale and color. */
     grayscaleToggle;
+    /** @type {HTMLInputElement|null} Range input for the opacity of the PCB images in percent. */
+    opacitySlider;
+    /** @type {HTMLElement|null} Element showing the current opacity. */
+    opacityValue;
 
     /**
      * Creates an Editor instance.
@@ -33,12 +37,22 @@ export class Editor {
      * @param {HTMLInputElement|null} [controls.pickToggle] - Checkbox to switch clicks from downloading to picking image coordinates.
      * @param {HTMLElement|null} [controls.pickStatus] - Element to show the image coordinates under the mouse in.
      * @param {HTMLInputElement|null} [controls.grayscaleToggle] - Checkbox to switch the images between grayscale and color.
+     * @param {HTMLInputElement|null} [controls.opacitySlider] - Range input (0-100) for the image opacity.
+     * @param {HTMLElement|null} [controls.opacityValue] - Element to show the current opacity in.
      */
-    constructor(editor, output, {pickToggle = null, pickStatus = null, grayscaleToggle = null} = {}) {
+    constructor(editor, output, {
+        pickToggle = null,
+        pickStatus = null,
+        grayscaleToggle = null,
+        opacitySlider = null,
+        opacityValue = null,
+    } = {}) {
         this.output = output;
         this.pickToggle = pickToggle;
         this.pickStatus = pickStatus;
         this.grayscaleToggle = grayscaleToggle;
+        this.opacitySlider = opacitySlider;
+        this.opacityValue = opacityValue;
 
         this.ace = ace.edit(editor);
         this.ace.setTheme("ace/theme/github");
@@ -63,6 +77,8 @@ export class Editor {
             if (this.pickStatus) this.pickStatus.textContent = '';
         });
         this.grayscaleToggle?.addEventListener('change', this.onGrayscaleToggle.bind(this));
+        this.opacitySlider?.addEventListener('input', this.onOpacityInput.bind(this));
+        this.opacitySlider?.addEventListener('change', this.onOpacityChange.bind(this));
     }
 
     /**
@@ -201,8 +217,8 @@ export class Editor {
     /**
      * Reflects the image settings of the configuration in the image controls
      *
-     * The grayscale toggle is checked when all images are grayscale (the default), indeterminate
-     * when front and back differ and disabled when there are no images.
+     * The grayscale toggle is checked when all images are grayscale (the default) and indeterminate
+     * when front and back differ. All controls are disabled when there are no images.
      *
      * @param {object} setup - The parsed YAML configuration object.
      * @private
@@ -218,6 +234,21 @@ export class Editor {
             this.grayscaleToggle.checked = grayscale.length > 0 && grayscale.every(Boolean);
             this.grayscaleToggle.indeterminate = grayscale.some(Boolean) && !grayscale.every(Boolean);
         }
+
+        if (this.opacitySlider) {
+            const opacities = [...new Set(images.map(image => Math.round(Number(image.opacity ?? 0.5) * 100)))];
+            this.opacitySlider.disabled = images.length === 0;
+            this.opacitySlider.value = opacities.length ? opacities[0] : 50;
+            this.showOpacity(opacities.length ? opacities.map(o => `${o}%`).join(' / ') : '');
+        }
+    }
+
+    /**
+     * @param {string} text
+     * @private
+     */
+    showOpacity(text) {
+        if (this.opacityValue) this.opacityValue.textContent = text;
     }
 
     /**
@@ -228,6 +259,24 @@ export class Editor {
         if (!this.setImageOption('grayscale', this.grayscaleToggle.checked)) {
             this.grayscaleToggle.checked = !this.grayscaleToggle.checked; // can't edit broken YAML, undo the click
         }
+    }
+
+    /**
+     * Previews the opacity while the slider is dragged, without touching the YAML
+     * @private
+     */
+    onOpacityInput() {
+        const opacity = this.opacitySlider.value / 100;
+        this.output.querySelectorAll('svg image').forEach(image => image.setAttribute('opacity', opacity));
+        this.showOpacity(`${this.opacitySlider.value}%`);
+    }
+
+    /**
+     * Sets the opacity option of all images in the YAML once the slider is released
+     * @private
+     */
+    onOpacityChange() {
+        this.setImageOption('opacity', this.opacitySlider.value / 100);
     }
 
     /**

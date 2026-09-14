@@ -16,7 +16,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Generates clean, scalable SVG diagrams.
   * Default sizes match the real-world PCB exactly — just print at 100%.
   * Fully self-contained, font and image resources are embedded into the file so it's fully portable.
-  * Images can be PNG, JPEG, GIF, WebP, AVIF, BMP or SVG, from local files or URLs.
+  * Images can be PNG, JPEG, GIF, WebP, AVIF, BMP or SVG, from local files or `https://` URLs.
 
 * **Configuration:**
   * Define pinouts, board dimensions, labels, and types using simple YAML or JSON files.
@@ -27,6 +27,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Syntax highlighting for YAML.
   * Switch PCB images between grayscale and color and adjust their opacity with a slider (sets `grayscale` and `opacity` of the images in the YAML).
   * Download generated SVG diagrams.
+  * Remote images are embedded into the download. Servers that block this are linked instead, the editor shows a notice when that happens.
 
 * **CLI Tool:**
   * Process multiple configuration files or entire directories to generate SVG diagrams programmatically.

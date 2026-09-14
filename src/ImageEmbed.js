@@ -1,4 +1,4 @@
-import {imageSize, sniffImageType, SUPPORTED_TYPES, toDataUri} from "./ImageInfo.js";
+import {FETCH_TIMEOUT, fetchImage, imageSize, sniffImageType, SUPPORTED_TYPES, toDataUri} from "./ImageInfo.js";
 
 // Basic environment detection
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
@@ -22,6 +22,15 @@ export class ImageEmbed {
      */
     constructor(base = '') {
         this.base = base;
+
+        /**
+         * Problems with the images of the last embedImages() call
+         *
+         * `linked` is true when the image could not be embedded, but can still be shown from its original URL.
+         *
+         * @type {{side: string, src: string, message: string, linked: boolean}[]}
+         */
+        this.problems = [];
     }
 
     /**
@@ -32,17 +41,21 @@ export class ImageEmbed {
      * with data URIs upon successful embedding. If embedding fails for an image,
      * a warning is logged, and the original `src` value is retained.
      *
+     * The image dimensions are stored as `naturalWidth` and `naturalHeight`. Images that can't be
+     * loaded at all get an `error` message instead. See `problems` for a summary.
+     *
      * @param {object} setup - The setup configuration object. Expected to potentially have `setup.image.front.src` and `setup.image.back.src`.
      * @returns {Promise<object>} A promise that resolves with the (potentially modified) setup object.
      */
     async embedImages(setup) {
+        this.problems = [];
         const imageConfigsToProcess = [];
         // Collect image sources to process, storing references to the config objects
         if (setup?.image?.front?.src) {
-            imageConfigsToProcess.push({config: setup.image.front, originalSrc: setup.image.front.src});
+            imageConfigsToProcess.push({side: 'front', config: setup.image.front, originalSrc: setup.image.front.src});
         }
         if (setup?.image?.back?.src) {
-            imageConfigsToProcess.push({config: setup.image.back, originalSrc: setup.image.back.src});
+            imageConfigsToProcess.push({side: 'back', config: setup.image.back, originalSrc: setup.image.back.src});
         }
 
         if (imageConfigsToProcess.length === 0) {
@@ -65,18 +78,32 @@ export class ImageEmbed {
                 item.config.src = result.value;
             } else {
                 // Embed failed: Log a warning, leave the original src untouched
-                console.warn(`Failed to embed image "${item.originalSrc}": ${result.reason?.message || result.reason}. Keeping original source.`);
+                item.error = result.reason?.message || String(result.reason);
+                console.warn(`Failed to embed image "${item.originalSrc}": ${item.error}. Keeping original source.`);
             }
         });
 
         // Photo layouts place everything in image pixel coordinates and need to know the image dimensions
-        await Promise.all(imageConfigsToProcess.map(async ({config}) => {
+        await Promise.all(imageConfigsToProcess.map(async (item) => {
+            const {side, config, originalSrc} = item;
+            const problem = (message, linked) => this.problems.push({side, src: originalSrc, message, linked});
+
+            // in Node.js there is no other way to load the image, don't try again
+            if (item.error && isNode) {
+                config.error = item.error;
+                problem(item.error, false);
+                return;
+            }
+
             try {
                 const {width, height} = await imageSize(config.src);
                 config.naturalWidth = width;
                 config.naturalHeight = height;
+                if (item.error) problem(item.error, true); // shown from its URL, but not embedded
             } catch (e) {
                 console.warn(e.message);
+                config.error = item.error ?? e.message;
+                problem(config.error, false);
             }
         }));
 
@@ -159,6 +186,7 @@ export class ImageEmbed {
         try {
             bytes = await this.fetchBytes(source);
         } catch (e) {
+            if (e.status) throw e; // the server answered, the service won't get a better response
             console.debug(`Direct fetch of '${source}' failed, using embed service: ${e.message}`);
             return this.embedService(source);
         }
@@ -170,7 +198,7 @@ export class ImageEmbed {
 
     /**
      * Embeds an image by calling a remote service that fetches it server side.
-     * The service only supports PNG and JPEG images.
+     * This works for servers that don't send CORS headers, but only for PNG and JPEG images.
      *
      * @param {string} source - The URL of the image.
      * @returns {Promise<string>} A promise that resolves with the image data URI.
@@ -179,9 +207,10 @@ export class ImageEmbed {
      */
     async embedService(source) {
         const embedServiceUrl = `${ImageEmbed.SERVICE}?url=${encodeURIComponent(source)}`;
-        const response = await fetch(embedServiceUrl);
+        const response = await fetch(embedServiceUrl, {signal: AbortSignal.timeout(FETCH_TIMEOUT)});
         if (!response.ok) {
-            throw new Error(`Failed to fetch data URI from service for '${source}': ${response.status} ${response.statusText} ${await response.text()}`);
+            const reason = (await response.text()).trim() || `HTTP ${response.status}`;
+            throw new Error(`Could not fetch '${source}' directly (the server is unreachable or does not allow it) and the embed service failed: ${reason}`);
         }
 
         const dataUri = await response.text();
@@ -199,11 +228,7 @@ export class ImageEmbed {
      * @private
      */
     async fetchBytes(url) {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch image '${url}': ${response.status} ${response.statusText}`);
-        }
-        return new Uint8Array(await response.arrayBuffer());
+        return fetchImage(url);
     }
 
     /**

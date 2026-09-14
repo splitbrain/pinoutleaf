@@ -108,13 +108,21 @@ a {
     #output .error {
         color: #cc322d;
     }
+
+    #output .notice {
+        margin-bottom: 1em;
+        padding: 0.5em 1em;
+        border: 1px solid #e38022;
+        background: #fdf3e8;
+        overflow-wrap: anywhere;
+    }
 }
 
 /**
  * Print Styles
  */
 @media print {
-    p {
+    p, #output .notice {
         display: none;
     }
 

@@ -31,17 +31,28 @@ export class PhotoLayout {
         if (!this.front.src) {
             throw new Error('Layouts using headers need a front image (image.front.src)');
         }
-        if (!this.front.naturalWidth || !this.front.naturalHeight) {
-            throw new Error(`Could not determine the dimensions of the front image "${this.front.src.substring(0, 100)}"`);
-        }
-        if (this.back.src && (!this.back.naturalWidth || !this.back.naturalHeight)) {
-            throw new Error(`Could not determine the dimensions of the back image "${this.back.src.substring(0, 100)}"`);
-        }
+        this.checkImage(this.front, 'front');
+        if (this.back.src) this.checkImage(this.back, 'back');
 
         this.headers = (setup.headers ?? []).map((header, index) => this.normalizeHeader(header, index));
         this.scale = this.calibrate();
         this.sheetWidth = this.front.naturalWidth * this.scale; // the axis we mirror the back side on
         this.backMatrix = this.fitBack();
+    }
+
+    /**
+     * Make sure the dimensions of an image are known
+     *
+     * @param {object} image The image configuration
+     * @param {string} side Which image this is
+     * @throws {Error} If the image could not be loaded or measured
+     */
+    checkImage(image, side) {
+        if (image.naturalWidth && image.naturalHeight) return;
+        if (image.error) {
+            throw new Error(`Could not load the ${side} image: ${image.error}`);
+        }
+        throw new Error(`Could not determine the dimensions of the ${side} image "${image.src.substring(0, 100)}"`);
     }
 
     /**

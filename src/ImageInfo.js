@@ -15,8 +15,36 @@ export const SUPPORTED_TYPES = [
     'image/svg+xml',
 ];
 
+/** Maximum time to wait for a remote image */
+export const FETCH_TIMEOUT = 30000;
+
 /** @type {Map<string, {width: number, height: number}>} */
 const cache = new Map();
+
+/**
+ * Fetch an image from a URL
+ *
+ * @param {string} url
+ * @returns {Promise<Uint8Array>}
+ * @throws {Error} On network errors and timeouts, or with a `status` property when the server responds with an HTTP error
+ */
+export async function fetchImage(url) {
+    let response;
+    try {
+        response = await fetch(url, {signal: AbortSignal.timeout(FETCH_TIMEOUT)});
+    } catch (e) {
+        if (e.name === 'TimeoutError') {
+            throw new Error(`Timed out after ${FETCH_TIMEOUT / 1000}s fetching image '${url}'`);
+        }
+        throw new Error(`Failed to fetch image '${url}': ${e.cause?.message ?? e.message}`);
+    }
+    if (!response.ok) {
+        const error = new Error(`Failed to fetch image '${url}': HTTP ${response.status} ${response.statusText}`.trim());
+        error.status = response.status;
+        throw error;
+    }
+    return new Uint8Array(await response.arrayBuffer());
+}
 
 /**
  * Get the dimensions of an image
@@ -37,14 +65,10 @@ export async function imageSize(src) {
         size = parseImageSize(bytes) ?? (partial ? parseImageSize(dataUriBytes(src).bytes) : null);
     } else {
         try {
-            const response = await fetch(src);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image '${src}': ${response.status} ${response.statusText}`);
-            }
-            size = parseImageSize(new Uint8Array(await response.arrayBuffer()));
+            size = parseImageSize(await fetchImage(src));
         } catch (e) {
             // in the browser, images from servers without CORS headers can still be displayed and measured
-            if (typeof globalThis.Image !== 'function') throw e;
+            if (typeof globalThis.Image !== 'function' || e.status) throw e;
             size = await browserImageSize(src);
         }
     }

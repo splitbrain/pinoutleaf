@@ -199,10 +199,7 @@ export class Editor {
             builder = new Builder(setup);
         } catch (e) {
             this.output.innerHTML = '';
-            const error = document.createElement('div');
-            error.className = 'error';
-            error.textContent = e.message;
-            this.output.appendChild(error);
+            this.output.appendChild(this.message('error', e.message));
             return;
         }
 
@@ -211,8 +208,27 @@ export class Editor {
         const back = builder.build().render(window.document);
 
         this.output.innerHTML = '';
+        embed.problems.forEach(({side, message, linked}) => {
+            this.output.appendChild(this.message('notice', linked
+                ? `⚠️ The ${side} image could not be embedded, it is linked instead. The downloaded SVG needs internet access to show it. (${message})`
+                : `⚠️ The ${side} image could not be loaded: ${message}`
+            ));
+        });
         this.output.appendChild(front);
         this.output.appendChild(back);
+    }
+
+    /**
+     * @param {string} className
+     * @param {string} text
+     * @returns {HTMLDivElement}
+     * @private
+     */
+    message(className, text) {
+        const div = document.createElement('div');
+        div.className = className;
+        div.textContent = text;
+        return div;
     }
 
     /**

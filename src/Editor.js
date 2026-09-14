@@ -204,6 +204,8 @@ export class Editor {
      * Converts the mouse position into pixel coordinates of the PCB photo below it.
      *
      * Only works for layouts using headers, where the photo is rendered in its pixel coordinates.
+     * Coordinates are rounded to about one screen pixel, so images with small units (like
+     * SVGs using millimeters) still get precise coordinates.
      *
      * @param {MouseEvent} e
      * @returns {{x: number, y: number, side: string}|null}
@@ -215,9 +217,12 @@ export class Editor {
         if (!matrix) return null;
 
         const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse());
+        const unitsPerScreenPixel = 1 / Math.hypot(matrix.a, matrix.b);
+        const decimals = Math.min(3, Math.max(0, Math.ceil(-Math.log10(unitsPerScreenPixel))));
+        const round = (value) => Number(value.toFixed(decimals));
         return {
-            x: Math.round(point.x),
-            y: Math.round(point.y),
+            x: round(point.x),
+            y: round(point.y),
             side: photo.getAttribute('data-side'),
         };
     }

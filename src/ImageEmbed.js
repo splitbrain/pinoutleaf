@@ -1,4 +1,4 @@
-import {imageSize} from "./ImageSize.js";
+import {imageSize, sniffImageType, SUPPORTED_TYPES, toDataUri} from "./ImageInfo.js";
 
 // Basic environment detection
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
@@ -6,8 +6,8 @@ const isNode = typeof process !== 'undefined' && process.versions != null && pro
 /**
  * Handles embedding images as data URIs, supporting both Node.js and browser environments.
  * In Node.js, it fetches remote URLs or reads local files directly.
- * In the browser, it utilizes a remote service to fetch and convert images.
- * Only supports JPEG and PNG image types.
+ * In the browser, it fetches images directly and falls back to a remote service for servers without CORS headers.
+ * Supports PNG, JPEG, GIF, WebP, AVIF, BMP and SVG images (the remote service only handles PNG and JPEG).
  */
 export class ImageEmbed {
     /**
@@ -95,6 +95,9 @@ export class ImageEmbed {
         if (!source) {
             throw new Error("Image source cannot be empty.");
         }
+        if (source.startsWith('data:')) {
+            return source; // already embedded
+        }
 
         if (isNode) {
             return this.embedNode(source);
@@ -105,9 +108,8 @@ export class ImageEmbed {
 
     /**
      * Embeds an image in a Node.js environment.
-     * Fetches remote URLs or reads local files directly, determines the MIME type,
-     * and converts the image data to a base64 data URI.
-     * Supports only JPEG and PNG images.
+     * Fetches remote URLs or reads local files directly, detects the image type
+     * from its contents and converts the image data to a base64 data URI.
      *
      * @param {string} source - The URL (http/https) or local file path of the image.
      * @returns {Promise<string>} A promise that resolves with the image data URI.
@@ -119,47 +121,27 @@ export class ImageEmbed {
         const fs = await import('fs/promises');
         const path = await import('path');
 
-        let buffer;
-        let mimeType;
-
+        let bytes;
         if (source.startsWith('http://') || source.startsWith('https://')) {
-            const response = await fetch(source);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image '${source}': ${response.status} ${response.statusText}`);
-            }
-            buffer = Buffer.from(await response.arrayBuffer());
-            mimeType = response.headers.get('content-type')?.split(';')[0].toLowerCase();
+            bytes = await this.fetchBytes(source);
         } else {
             source = this.base ? path.join(this.base, source) : source;
-
-            buffer = await fs.readFile(source);
-            const extension = path.extname(source).toLowerCase();
-            if (extension === '.jpg' || extension === '.jpeg') {
-                mimeType = 'image/jpeg';
-            } else if (extension === '.png') {
-                mimeType = 'image/png';
-            } else {
-                mimeType = null; // Will be caught by validation below
-            }
+            bytes = new Uint8Array(await fs.readFile(source));
         }
 
-        if (mimeType !== 'image/jpeg' && mimeType !== 'image/png') {
-            throw new Error(`Unsupported image type for source "${source}". Only JPEG and PNG are supported. Detected type: ${mimeType || 'unknown'}`);
-        }
-
-        const base64 = buffer.toString('base64');
-        const dataUri = `data:${mimeType};base64,${base64}`;
+        const dataUri = this.toImageDataUri(bytes, source);
         console.debug(`Generated data URI for ${source} (length: ${dataUri.length})`);
         return dataUri;
     }
 
     /**
-     * Embeds an image in a browser environment by calling a remote service.
-     * The service is expected to handle fetching/conversion and return the data URI.
+     * Embeds an image in a browser environment.
+     * The image is fetched directly. If that fails (usually because the server does not send
+     * CORS headers), a remote service is used to fetch and convert the image instead.
      *
-     * @param {string} source - The URL (http/https) or potentially a path resolvable by the service.
+     * @param {string} source - The URL (http/https) or a path relative to the current page.
      * @returns {Promise<string>} A promise that resolves with the image data URI.
-     * @throws {Error} If the service call fails or returns an invalid response.
+     * @throws {Error} If the image can't be fetched, is unsupported or the service call fails.
      * @private
      */
     async embedBrowser(source) {
@@ -173,10 +155,33 @@ export class ImageEmbed {
             if (source.match(/^http:\/\/(localhost|127.0.0.1)/)) return source; // no local embeds
         }
 
+        let bytes;
+        try {
+            bytes = await this.fetchBytes(source);
+        } catch (e) {
+            console.debug(`Direct fetch of '${source}' failed, using embed service: ${e.message}`);
+            return this.embedService(source);
+        }
+
+        const dataUri = this.toImageDataUri(bytes, source);
+        console.debug(`Generated data URI for ${source} (length: ${dataUri.length})`);
+        return dataUri;
+    }
+
+    /**
+     * Embeds an image by calling a remote service that fetches it server side.
+     * The service only supports PNG and JPEG images.
+     *
+     * @param {string} source - The URL of the image.
+     * @returns {Promise<string>} A promise that resolves with the image data URI.
+     * @throws {Error} If the service call fails or returns an invalid response.
+     * @private
+     */
+    async embedService(source) {
         const embedServiceUrl = `${ImageEmbed.SERVICE}?url=${encodeURIComponent(source)}`;
         const response = await fetch(embedServiceUrl);
         if (!response.ok) {
-            throw new Error(`Failed to fetch data URI from service for '${source}': ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to fetch data URI from service for '${source}': ${response.status} ${response.statusText} ${await response.text()}`);
         }
 
         const dataUri = await response.text();
@@ -186,6 +191,34 @@ export class ImageEmbed {
         }
         console.debug(`Received data URI for ${source} (length: ${dataUri.length})`);
         return dataUri;
+    }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<Uint8Array>}
+     * @private
+     */
+    async fetchBytes(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch image '${url}': ${response.status} ${response.statusText}`);
+        }
+        return new Uint8Array(await response.arrayBuffer());
+    }
+
+    /**
+     * @param {Uint8Array} bytes The image file contents
+     * @param {string} source The image source for error messages
+     * @returns {string} The data URI
+     * @throws {Error} If the image type is unsupported
+     * @private
+     */
+    toImageDataUri(bytes, source) {
+        const mimeType = sniffImageType(bytes);
+        if (!mimeType) {
+            throw new Error(`Unsupported image type for source "${source}". Supported types: ${SUPPORTED_TYPES.join(', ')}`);
+        }
+        return toDataUri(bytes, mimeType);
     }
 
 }

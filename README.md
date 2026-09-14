@@ -16,6 +16,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Generates clean, scalable SVG diagrams.
   * Default sizes match the real-world PCB exactly — just print at 100%.
   * Fully self-contained, font and image resources are embedded into the file so it's fully portable.
+  * Images can be PNG, JPEG, GIF, WebP, AVIF, BMP or SVG, from local files or URLs.
 
 * **Configuration:**
   * Define pinouts, board dimensions, labels, and types using simple YAML or JSON files.
@@ -110,6 +111,7 @@ headers:
 
 Things to know:
 
+* Coordinates are in image pixels. For SVG images they are in the units of the SVG's `viewBox`.
 * The distance between the holes and the pin pitch determine the scale of the photo. Until a header with at least two pins exists, the diagram is marked as *not to scale*.
 * `pitch` sets the pin spacing in mm, either globally or per header. It defaults to `2.54`.
 * `count` sets the number of holes when you don't want to list every pin yet.

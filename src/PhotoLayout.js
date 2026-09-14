@@ -2,6 +2,7 @@ import {PINSPACE} from "./Constants.js";
 
 const UNCALIBRATED_SIZE = 5000; // 50mm, size of the longest image side when no scale can be derived
 const DEVIATION_WARNING = 0.05; // warn when a header's pin spacing is off by more than 5%
+const MISMATCH_WARNING = 100; // warn when back holes are more than 1mm away from their front counterparts
 const SIDES = ['left', 'right', 'top', 'bottom'];
 
 /**
@@ -11,6 +12,9 @@ const SIDES = ['left', 'right', 'top', 'bottom'];
  * coordinate system. Pin headers are placed on the photo by giving the pixel coordinates of their
  * first and last hole, the holes in between are spaced equally. The known pin pitch is then used
  * to derive the real world scale of the photo, so the output is still printable at 100%.
+ *
+ * Headers can optionally be placed on the back photo independently. The back photo is then fitted
+ * onto the (mirrored) front, so both diagrams can still be folded on top of each other.
  *
  * All returned coordinates are in SVG units (1/100 mm).
  */
@@ -45,7 +49,7 @@ export class PhotoLayout {
      *
      * @param {object} header
      * @param {int} index
-     * @returns {{side: string, pitch: number, pins: Array<string[]|null>, holes: {x: number, y: number}[]}}
+     * @returns {{side: string, pitch: number, pins: Array<string[]|null>, holes: {x: number, y: number}[], back: {side: string|undefined, holes: {x: number, y: number}[]}|null}}
      */
     normalizeHeader(header, index) {
         const name = `Header ${index + 1}`;
@@ -69,11 +73,26 @@ export class PhotoLayout {
             throw new Error(`${name}: side must be one of ${SIDES.join(', ')}`);
         }
 
+        let back = null;
+        if (header.back) {
+            if (!this.back.src) {
+                throw new Error(`${name}: back coordinates need a back image (image.back.src)`);
+            }
+            back = {
+                side: header.back.side,
+                holes: this.holePositions(header.back, count, `${name} (back)`),
+            };
+            if (back.side !== undefined && !SIDES.includes(back.side)) {
+                throw new Error(`${name} (back): side must be one of ${SIDES.join(', ')}`);
+            }
+        }
+
         return {
             side,
             pitch: header.pitch ?? this.pitch,
             pins,
             holes,
+            back,
         };
     }
 
@@ -173,7 +192,9 @@ export class PhotoLayout {
     /**
      * Find the transformation from back image pixels to back view coordinates
      *
-     * The back photo is centered at the front image's scale. Without a back image, the front image is mirrored.
+     * When headers have back coordinates, the back photo is scaled, rotated and moved so its holes
+     * match the mirrored front holes as closely as possible (least squares). Otherwise it is centered
+     * at the front image's scale. Without a back image, the front image is mirrored.
      *
      * @returns {number[]} SVG transformation matrix
      */
@@ -183,11 +204,74 @@ export class PhotoLayout {
             return [-s, 0, 0, s, this.sheetWidth, 0];
         }
 
-        return [
-            s, 0, 0, s,
-            (this.front.naturalWidth - this.back.naturalWidth) * s / 2,
-            (this.front.naturalHeight - this.back.naturalHeight) * s / 2,
+        const pairs = this.headers
+            .filter(header => header.back)
+            .flatMap(header => header.holes.map((hole, i) => ({
+                from: header.back.holes[i],
+                to: this.mirrorHole(hole),
+            })));
+
+        const distinct = new Set(pairs.map(({from}) => `${from.x},${from.y}`));
+        if (distinct.size < 2) {
+            if (pairs.length) {
+                console.warn('Back coordinates need at least two different holes to align the back image, ignoring them.');
+            }
+            return [
+                s, 0, 0, s,
+                (this.front.naturalWidth - this.back.naturalWidth) * s / 2,
+                (this.front.naturalHeight - this.back.naturalHeight) * s / 2,
+            ];
+        }
+
+        // similarity transform to = a * from + t, with a and t as complex numbers
+        const mean = (points) => ({
+            x: points.reduce((sum, p) => sum + p.x, 0) / points.length,
+            y: points.reduce((sum, p) => sum + p.y, 0) / points.length,
+        });
+        const fromMean = mean(pairs.map(p => p.from));
+        const toMean = mean(pairs.map(p => p.to));
+
+        let re = 0, im = 0, norm = 0;
+        pairs.forEach(({from, to}) => {
+            const fx = from.x - fromMean.x, fy = from.y - fromMean.y;
+            const tx = to.x - toMean.x, ty = to.y - toMean.y;
+            re += tx * fx + ty * fy;
+            im += ty * fx - tx * fy;
+            norm += fx * fx + fy * fy;
+        });
+        re /= norm;
+        im /= norm;
+
+        const matrix = [
+            re, im, -im, re,
+            toMean.x - (re * fromMean.x - im * fromMean.y),
+            toMean.y - (im * fromMean.x + re * fromMean.y),
         ];
+
+        const rotation = Math.atan2(im, re) * 180 / Math.PI;
+        if (Math.abs(rotation) > 45) {
+            console.warn(
+                `The back image had to be rotated by ${Math.round(rotation)}° to match the front. ` +
+                `Make sure back start and end point to the same first and last pin as on the front.`
+            );
+        }
+
+        this.headers.forEach((header, index) => {
+            if (!header.back) return;
+            const offset = Math.max(...header.holes.map((hole, i) => {
+                const fitted = this.transformPoint(matrix, header.back.holes[i]);
+                const target = this.mirrorHole(hole);
+                return Math.hypot(fitted.x - target.x, fitted.y - target.y);
+            }));
+            if (offset > MISMATCH_WARNING) {
+                console.warn(
+                    `Header ${index + 1}: back holes are up to ${(offset / 100).toFixed(1)}mm off from the front. ` +
+                    `Check the back start and end coordinates, they need to point to the same first and last pin as on the front.`
+                );
+            }
+        });
+
+        return matrix;
     }
 
     /**
@@ -207,9 +291,12 @@ export class PhotoLayout {
                     return {x: hole.x * this.scale, y: hole.y * this.scale, side: header.side, labels: header.pins[i]};
                 }
 
+                const position = header.back
+                    ? this.transformPoint(this.backMatrix, header.back.holes[i])
+                    : this.mirrorHole(hole);
                 return {
-                    ...this.mirrorHole(hole),
-                    side: mirroredSide[header.side] ?? header.side,
+                    ...position,
+                    side: header.back?.side ?? mirroredSide[header.side] ?? header.side,
                     labels: header.pins[i],
                 };
             })

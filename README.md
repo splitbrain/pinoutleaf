@@ -35,6 +35,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Photo First Layouts:**
   * Start with a photo of your PCB and place pin headers on it by clicking their first and last hole.
   * The pin pitch is used to derive the real-world scale, no fiddling with image offsets.
+  * Front and back photos can be placed independently.
 
 ## Screenshot
 
@@ -82,10 +83,15 @@ title: "SIM7080G Module"
 image:
   front:
     src: "SIM7080G-front-pcb.png"
+  back:
+    src: "SIM7080G-back-pcb.png"
 
 headers:
-  - start: [ 672, 1682 ]   # pixel position of the first hole on the image
+  - start: [ 672, 1682 ]   # pixel position of the first hole on the front image
     end: [ 657, 2550 ]     # pixel position of the last hole
+    back:                  # optional: the same header on the back image
+      start: [ 1728, 1695 ]
+      end: [ 1728, 2518 ]
     pins:
       - [ "DTR:uart" ]
       - [ "PWR" ]
@@ -97,8 +103,8 @@ headers:
       - [ "GND:gnd" ]
 ```
 
-1. Set the front image and add a header with its `start` and `end`.
-2. In the web editor, check **📍 Pick coordinates**, put the editor cursor where the coordinates should go and click the hole on the photo. The pixel coordinates are inserted for you.
+1. Set the front (and back) image and add a header with its `start` and `end`.
+2. In the web editor, check **📍 Pick coordinates**, put the editor cursor where the coordinates should go and click the hole on the photo. The pixel coordinates are inserted for you. Clicking the back photo gives back image coordinates.
 3. Add as many entries to `pins` as the header has holes. The holes are spaced equally between `start` and `end`.
 4. Label the pins just like in grid layouts.
 
@@ -108,8 +114,9 @@ Things to know:
 * `pitch` sets the pin spacing in mm, either globally or per header. It defaults to `2.54`.
 * `count` sets the number of holes when you don't want to list every pin yet.
 * Use `null` (an empty list item) instead of `[ ]` to skip a hole.
-* `side` (`left`, `right`, `top`, `bottom`) sets where labels are drawn. It is guessed from the header's position when omitted and mirrored for the back view.
-* A back photo is centered at the front image's scale. Without a back image, the front photo is mirrored for the back view.
+* `side` (`left`, `right`, `top`, `bottom`) sets where labels are drawn. It is guessed from the header's position when omitted and mirrored for the back view. Use `back.side` to override it for the back.
+* The back photo is scaled and rotated so its holes match the front ones. Without `back` coordinates, it is centered at the front image's scale. Without a back image, the front photo is mirrored.
+* `back` `start` and `end` must point to the same first and last pin as on the front. Check the console for warnings when things don't line up.
 
 ### Printing
 

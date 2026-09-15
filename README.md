@@ -47,7 +47,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 ## Limits
 
   * Grid layouts: only four rows of pins are supported (left, right, top, bottom) on the standard 0.1-inch raster.
-  * Photo first layouts: pins within a header are equally spaced along a straight line. Labels always point left, right, up or down.
+  * Photo first layouts: headers have one or two rows, pins within a row are equally spaced along a straight line. Labels always point left, right, up or down.
 
 ## Alternatives
 
@@ -118,9 +118,32 @@ Things to know:
 * `pitch` sets the pin spacing in mm, either globally or per header. It defaults to `2.54`.
 * `count` sets the number of holes when you don't want to list every pin yet.
 * Use `null` (an empty list item) instead of `[ ]` to skip a hole.
+* Double-row headers (like 2×20 GPIO headers) use `rows: 2` plus `rowStart` or `rowEnd`, the position of the second row's first or last hole. See below.
 * `side` (`left`, `right`, `top`, `bottom`) sets where labels are drawn. It is guessed from the header's position when omitted and mirrored for the back view. Use `back.side` to override it for the back.
 * The back photo is scaled and rotated so its holes match the front ones. Without `back` coordinates, it is centered at the front image's scale. Without a back image, the front photo is mirrored.
 * `back` `start` and `end` must point to the same first and last pin as on the front. Check the console for warnings when things don't line up.
+
+#### Double-Row Headers
+
+```yaml
+headers:
+  - start: [ 300, 200 ]    # first hole of the first row (pin 1)
+    end: [ 300, 700 ]      # last hole of the first row
+    rows: 2
+    rowEnd: [ 400, 700 ]   # last hole of the second row (or rowStart for its first hole)
+    order: zigzag          # pin numbering, see below
+    pins:
+      - [ "1", "VCC:power" ]
+      - [ "2", "5V:power" ]
+      # ...
+```
+
+* `pins` lists both rows. `order` sets how they are numbered:
+  * `zigzag` (default): pin 1 in the first row, pin 2 next to it in the second row, pin 3 below pin 1, and so on.
+  * `rows`: the whole first row, then the second row in the same direction.
+  * `around`: the whole first row, then back along the second row, like DIP chips.
+* The labels of both rows point away from each other. `side` sets the side of the first row.
+* On the back, `rowStart` or `rowEnd` are optional. Without them, the second row keeps the same distance to the first row as on the front.
 
 ### Printing
 

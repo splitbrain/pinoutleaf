@@ -16,6 +16,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Generates clean, scalable SVG diagrams.
   * Default sizes match the real-world PCB exactly — just print at 100%.
   * Fully self-contained, font and image resources are embedded into the file so it's fully portable.
+  * Images can be PNG, JPEG, GIF, WebP, AVIF, BMP or SVG, from local files or `https://` URLs.
 
 * **Configuration:**
   * Define pinouts, board dimensions, labels, and types using simple YAML or JSON files.
@@ -24,7 +25,9 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Web Editor:**
   * Real-time preview of the diagram as you edit the configuration.
   * Syntax highlighting for YAML.
-  * Download generated SVG diagrams.
+  * Switch PCB images between grayscale and color and adjust their opacity with a slider (sets `grayscale` and `opacity` of the images in the YAML).
+  * Download the front, the back or both (as two files or combined into one) as SVG or PNG. PNGs have 300 DPI and print in real size, too.
+  * Remote images are embedded into the download. Servers that block this are linked instead, the editor shows a notice when that happens.
 
 * **CLI Tool:**
   * Process multiple configuration files or entire directories to generate SVG diagrams programmatically.
@@ -32,15 +35,19 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
 * **Front & Back Views:**
   * Automatically generates diagrams for both the front and back sides of the PCB.
 
+* **Photo First Layouts:**
+  * Start with a photo of your PCB and place pin headers on it by clicking their first and last hole.
+  * The pin pitch is used to derive the real-world scale, no fiddling with image offsets.
+  * Front and back photos can be placed independently.
+
 ## Screenshot
 
 ![Screenshot](screenshot.png)
 
 ## Limits
 
-  * Only four rows of pins are supported (left, right, top, bottom).
-  * No weird arbitrary layouts.
-  * Only the standard 0.1-inch pin raster is supported (might change in the future).
+  * Grid layouts: only four rows of pins are supported (left, right, top, bottom) on the standard 0.1-inch raster.
+  * Photo first layouts: headers have one or two rows, pins within a row are equally spaced along a straight line. Labels always point left, right, up or down.
 
 ## Alternatives
 
@@ -68,6 +75,75 @@ Feel free to open an issue when you create a new pinout leaf and we can add it t
 Check the [pinouts](https://github.com/splitbrain/pinoutleaf/tree/gh-pages/pinouts) directory for boards that have already been defined.
 
 Open a [pull request](https://github.com/splitbrain/pinoutleaf/pulls) or [ticket](https://github.com/splitbrain/pinoutleaf/issues) if you made one and want it included in the repo.
+
+### Photo First Layouts
+
+Instead of describing a pin grid and nudging the image until it matches, you can start with a photo and place the pins on it. Use `headers` instead of `width`, `height`, `offsets` and `pins`:
+
+```yaml
+title: "SIM7080G Module"
+
+image:
+  front:
+    src: "SIM7080G-front-pcb.png"
+  back:
+    src: "SIM7080G-back-pcb.png"
+
+headers:
+  - start: [ 672, 1682 ]   # pixel position of the first hole on the front image
+    end: [ 657, 2550 ]     # pixel position of the last hole
+    back:                  # optional: the same header on the back image
+      start: [ 1728, 1695 ]
+      end: [ 1728, 2518 ]
+    pins:
+      - [ "DTR:uart" ]
+      - [ "PWR" ]
+      - [ "RTS:uart" ]
+      - [ ]                # a hole without labels
+      - [ ]
+      - [ ]
+      - [ "3V3:power" ]
+      - [ "GND:gnd" ]
+```
+
+1. Set the front (and back) image and add a header with its `start` and `end`.
+2. In the web editor, check **📍 Pick coordinates**, put the editor cursor where the coordinates should go and click the hole on the photo. The pixel coordinates are inserted for you. Clicking the back photo gives back image coordinates.
+3. Add as many entries to `pins` as the header has holes. The holes are spaced equally between `start` and `end`.
+4. Label the pins just like in grid layouts.
+
+Things to know:
+
+* Coordinates are in image pixels. For SVG images they are in the units of the SVG's `viewBox`.
+* The distance between the holes and the pin pitch determine the scale of the photo. Until a header with at least two pins exists, the diagram is marked as *not to scale*.
+* `pitch` sets the pin spacing in mm, either globally or per header. It defaults to `2.54`.
+* `count` sets the number of holes when you don't want to list every pin yet.
+* Use `null` (an empty list item) instead of `[ ]` to skip a hole.
+* Double-row headers (like 2×20 GPIO headers) use `rows: 2` plus `rowStart` or `rowEnd`, the position of the second row's first or last hole. See below.
+* `side` (`left`, `right`, `top`, `bottom`) sets where labels are drawn. It is guessed from the header's position when omitted and mirrored for the back view. Use `back.side` to override it for the back.
+* The back photo is scaled and rotated so its holes match the front ones. Without `back` coordinates, it is centered at the front image's scale. Without a back image, the front photo is mirrored.
+* `back` `start` and `end` must point to the same first and last pin as on the front. Check the console for warnings when things don't line up.
+
+#### Double-Row Headers
+
+```yaml
+headers:
+  - start: [ 300, 200 ]    # first hole of the first row (pin 1)
+    end: [ 300, 700 ]      # last hole of the first row
+    rows: 2
+    rowEnd: [ 400, 700 ]   # last hole of the second row (or rowStart for its first hole)
+    order: zigzag          # pin numbering, see below
+    pins:
+      - [ "1", "VCC:power" ]
+      - [ "2", "5V:power" ]
+      # ...
+```
+
+* `pins` lists both rows. `order` sets how they are numbered:
+  * `zigzag` (default): pin 1 in the first row, pin 2 next to it in the second row, pin 3 below pin 1, and so on.
+  * `rows`: the whole first row, then the second row in the same direction.
+  * `around`: the whole first row, then back along the second row, like DIP chips.
+* The labels of both rows point away from each other. `side` sets the side of the first row.
+* On the back, `rowStart` or `rowEnd` are optional. Without them, the second row keeps the same distance to the first row as on the front.
 
 ### Printing
 

@@ -8,6 +8,15 @@ import {Title} from "./components/Title.js";
 import {Pcb} from "./components/Pcb.js";
 import merge from 'lodash.merge';
 import {RootGroup} from "./components/RootGroup.js";
+import {PhotoPcb} from "./components/PhotoPcb.js";
+import {PhotoLayout} from "./PhotoLayout.js";
+
+const SIDE_ALIGNMENT = {
+    left: 'leftof',
+    right: 'rightof',
+    top: 'above',
+    bottom: 'under',
+};
 
 export class Builder {
 
@@ -93,6 +102,7 @@ export class Builder {
         },
 
         // pin label:type, each pin can have multiple labels
+        // Alternatively use `headers` to place pins on the front image by pixel coordinates (see PhotoLayout)
         pins: {
             left: [],
             right: [],
@@ -106,7 +116,8 @@ export class Builder {
      */
     constructor(setup) {
         this.setup = merge(this.setup, setup);
-        this.normalizePinArrays();
+        this.photo = this.setup.headers ? new PhotoLayout(this.setup) : null;
+        if (!this.photo) this.normalizePinArrays();
         this.isFlipped = false;
     }
 
@@ -122,24 +133,37 @@ export class Builder {
         svg.append(root);
 
 
-        // Create pin rows
         const pinLayoutGroup = new Group();
-        pinLayoutGroup.append(this.createPinRow('left', 'leftof'));
-        pinLayoutGroup.append(this.createPinRow('right', 'rightof'));
-        pinLayoutGroup.append(this.createPinRow('top', 'above'));
-        pinLayoutGroup.append(this.createPinRow('bottom', 'under'));
+        if (this.photo) {
+            // Create holes placed on the photo
+            this.photo.holes(this.isFlipped).forEach(hole => {
+                pinLayoutGroup.append(this.createPinWithLabels(hole, hole.labels, SIDE_ALIGNMENT[hole.side]));
+            });
+
+            const {placement, bounds} = this.photo.pcb(this.isFlipped);
+            pinLayoutGroup.prepend(new PhotoPcb(placement, bounds));
+        } else {
+            // Create pin rows
+            pinLayoutGroup.append(this.createPinRow('left', 'leftof'));
+            pinLayoutGroup.append(this.createPinRow('right', 'rightof'));
+            pinLayoutGroup.append(this.createPinRow('top', 'above'));
+            pinLayoutGroup.append(this.createPinRow('bottom', 'under'));
+
+            // Add the PCB background
+            const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
+            pinLayoutGroup.prepend(pcb);
+        }
         root.append(pinLayoutGroup);
 
-        // Add the PCB background
-        const pcb = new Pcb(this.setup.width, this.setup.height, this.setup.image);
-        pinLayoutGroup.prepend(pcb);
-
         // Create the title
-        const title = new Title(this.setup.title + (this.isFlipped ? '  (back)' : ' (front)'));
+        let titleText = this.setup.title + (this.isFlipped ? '  (back)' : ' (front)');
+        if (this.photo && !this.photo.calibrated) titleText += ' - not to scale';
+        const title = new Title(titleText);
         root.append(title)
 
         // Create the legend
-        const legend = new Legend(this.setup.types, this.setup.pins, this.isFlipped);
+        const pinsData = this.photo ? this.photo.pinsData() : this.setup.pins;
+        const legend = new Legend(this.setup.types, pinsData, this.isFlipped);
         root.append(legend);
 
         // Get bounding box of the main pin layout
@@ -149,7 +173,9 @@ export class Builder {
 
         // Position legend to the bottom aligned to the right/left of the pin layout with padding
         let rootBBox = root.getBoundingBox();
-        if(this.isFlipped) {
+        if (!legendBBox) {
+            // no labels, no legend
+        } else if(this.isFlipped) {
             // FIXME
             //   it's hacky:
             //   rect returns the visual bounding box that includes the stroke width
@@ -184,6 +210,7 @@ export class Builder {
      */
     flip() {
         this.isFlipped = !this.isFlipped;
+        if (this.photo) return; // photo layouts mirror their coordinates when building
 
         // Swap left and right pins
         const tempLeftPins = this.setup.pins.left;
@@ -251,19 +278,18 @@ export class Builder {
 
     /**
      * Creates a pin with its labels
-     * @param {string} row The row identifier ('left', 'right', 'top', 'bottom')
-     * @param {number} pinIndex The index of the pin in the row
+     * @param {{x: number, y: number}} pos The position of the pin
+     * @param {string[]} labels The labels for this pin in label:type format
      * @param {string} alignment The alignment of labels ('leftof', 'rightof', 'above', 'under')
      * @returns {Group} A group containing the pin and its labels
      */
-    createPinWithLabels(row, pinIndex, alignment) {
+    createPinWithLabels(pos, labels, alignment) {
         const group = new Group();
-        const pos = this.pinPosition(row, pinIndex);
         const pinElement = new Circle(pos.x, pos.y, PINSIZE, 'gold');
         group.append(pinElement);
 
         let last = pinElement;
-        this.setup.pins[row][pinIndex].forEach((pindata, index) => {
+        labels.forEach((pindata, index) => {
             const [text, type] = pindata.split(':');
             const {bgcolor, fgcolor} = this.setup.types[type] || this.setup.types.default;
 
@@ -292,7 +318,7 @@ export class Builder {
         for (let pin = 0; pin < pinCount; pin++) {
             if (!this.setup.pins[row][pin]) continue; // pin is null
             if (!this.setup.pins[row][pin].length) continue; // No definition for this pin, skip it
-            const pinGroup = this.createPinWithLabels(row, pin, alignment);
+            const pinGroup = this.createPinWithLabels(this.pinPosition(row, pin), this.setup.pins[row][pin], alignment);
             rowGroup.append(pinGroup);
         }
 

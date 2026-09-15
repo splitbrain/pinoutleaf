@@ -6,7 +6,18 @@ import {Editor} from "./Editor.js";
 
     const editor = new Editor(
         document.getElementById('editor'),
-        document.getElementById('output')
+        document.getElementById('output'),
+        {
+            pickToggle: document.getElementById('pick-toggle'),
+            pickStatus: document.getElementById('pick-status'),
+            grayscaleToggle: document.getElementById('grayscale-toggle'),
+            opacitySlider: document.getElementById('opacity-slider'),
+            opacityValue: document.getElementById('opacity-value'),
+            downloadSides: document.getElementById('download-sides'),
+            downloadFormat: document.getElementById('download-format'),
+            downloadButton: document.getElementById('download-button'),
+            downloadStatus: document.getElementById('download-status'),
+        }
     );
 
 

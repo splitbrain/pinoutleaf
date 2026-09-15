@@ -4,6 +4,8 @@ import 'ace-builds/src-noconflict/theme-github';
 import Yaml from 'yaml';
 import {Builder} from "./Builder.js";
 import { ImageEmbed } from "./ImageEmbed.js";
+import {imageOptionEdits} from "./YamlEdit.js";
+import {combineSvgs, pngFile, saveBlob, slugify, svgFile} from "./Download.js";
 
 /**
  * Manages the Ace editor instance, handles YAML parsing,
@@ -17,14 +19,60 @@ export class Editor {
     ace;
     /** @type {HTMLElement} The HTML element where the SVG output is rendered. */
     output;
+    /** @type {HTMLInputElement|null} Checkbox enabling the coordinate picker. */
+    pickToggle;
+    /** @type {HTMLElement|null} Element showing the coordinates under the mouse. */
+    pickStatus;
+    /** @type {HTMLInputElement|null} Checkbox switching the PCB images between grayscale and color. */
+    grayscaleToggle;
+    /** @type {HTMLInputElement|null} Range input for the opacity of the PCB images in percent. */
+    opacitySlider;
+    /** @type {HTMLElement|null} Element showing the current opacity. */
+    opacityValue;
+    /** @type {HTMLSelectElement|null} Which diagrams to download: front, back, separate or combined. */
+    downloadSides;
+    /** @type {HTMLSelectElement|null} Download format: svg or png. */
+    downloadFormat;
+    /** @type {HTMLElement|null} Element showing download problems. */
+    downloadStatus;
+    /** @type {string} Title of the current diagram, used for file names. */
+    title = '';
 
     /**
      * Creates an Editor instance.
      * @param {string|HTMLElement} editor - The ID or HTML element for the Ace editor container.
      * @param {HTMLElement} output - The HTML element to render the SVG output into.
+     * @param {object} [controls] - Optional UI controls.
+     * @param {HTMLInputElement|null} [controls.pickToggle] - Checkbox to switch clicks from downloading to picking image coordinates.
+     * @param {HTMLElement|null} [controls.pickStatus] - Element to show the image coordinates under the mouse in.
+     * @param {HTMLInputElement|null} [controls.grayscaleToggle] - Checkbox to switch the images between grayscale and color.
+     * @param {HTMLInputElement|null} [controls.opacitySlider] - Range input (0-100) for the image opacity.
+     * @param {HTMLElement|null} [controls.opacityValue] - Element to show the current opacity in.
+     * @param {HTMLSelectElement|null} [controls.downloadSides] - Select for which diagrams to download.
+     * @param {HTMLSelectElement|null} [controls.downloadFormat] - Select for the download format.
+     * @param {HTMLButtonElement|null} [controls.downloadButton] - Button to start the download.
+     * @param {HTMLElement|null} [controls.downloadStatus] - Element to show download problems in.
      */
-    constructor(editor, output) {
+    constructor(editor, output, {
+        pickToggle = null,
+        pickStatus = null,
+        grayscaleToggle = null,
+        opacitySlider = null,
+        opacityValue = null,
+        downloadSides = null,
+        downloadFormat = null,
+        downloadButton = null,
+        downloadStatus = null,
+    } = {}) {
         this.output = output;
+        this.pickToggle = pickToggle;
+        this.pickStatus = pickStatus;
+        this.grayscaleToggle = grayscaleToggle;
+        this.opacitySlider = opacitySlider;
+        this.opacityValue = opacityValue;
+        this.downloadSides = downloadSides;
+        this.downloadFormat = downloadFormat;
+        this.downloadStatus = downloadStatus;
 
         this.ace = ace.edit(editor);
         this.ace.setTheme("ace/theme/github");
@@ -42,7 +90,16 @@ export class Editor {
         });
 
         this.initializeEditor();
-        this.output.addEventListener('click', this.onDownloadClick);
+        this.output.addEventListener('click', this.onOutputClick.bind(this));
+        this.output.addEventListener('mousemove', this.onOutputMove.bind(this));
+        this.pickToggle?.addEventListener('change', () => {
+            this.output.classList.toggle('picking', this.pickToggle.checked);
+            if (this.pickStatus) this.pickStatus.textContent = '';
+        });
+        this.grayscaleToggle?.addEventListener('change', this.onGrayscaleToggle.bind(this));
+        this.opacitySlider?.addEventListener('input', this.onOpacityInput.bind(this));
+        this.opacitySlider?.addEventListener('change', this.onOpacityChange.bind(this));
+        downloadButton?.addEventListener('click', () => this.download(this.downloadSides?.value ?? 'separate'));
     }
 
     /**
@@ -52,6 +109,7 @@ export class Editor {
      */
     async initializeEditor() {
         await this.loadInitialContent();
+        this.ace.session.getUndoManager().reset(); // undo should not remove the loaded content
 
         this.ace.session.on('change', this.debounce(this.onChange.bind(this), 300));
         if (this.ace.getValue()) {
@@ -129,6 +187,7 @@ export class Editor {
                 prettyErrors: true,
             });
             localStorage.setItem(this.STORAGE_KEY, yaml);
+            this.updateImageControls(parsed);
             this.onUpdate(parsed);
             this.clearErrors();
         } catch (e) {
@@ -156,19 +215,200 @@ export class Editor {
         const embed = new ImageEmbed('pinouts'); // Assuming 'pinouts' is the base path for local images
         setup = await embed.embedImages(setup);
 
-        const builder = new Builder(setup);
+        let builder;
+        try {
+            builder = new Builder(setup);
+        } catch (e) {
+            this.output.innerHTML = '';
+            this.output.appendChild(this.message('error', e.message));
+            return;
+        }
 
         const front = builder.build().render(window.document);
         builder.flip();
         const back = builder.build().render(window.document);
 
+        this.title = setup.title ?? '';
         this.output.innerHTML = '';
+        embed.problems.forEach(({side, message, linked}) => {
+            this.output.appendChild(this.message('notice', linked
+                ? `⚠️ The ${side} image could not be embedded, it is linked instead. The downloaded SVG needs internet access to show it. (${message})`
+                : `⚠️ The ${side} image could not be loaded: ${message}`
+            ));
+        });
         this.output.appendChild(front);
         this.output.appendChild(back);
     }
 
     /**
-     * Handles click events on the output area to trigger SVG download.
+     * @param {string} className
+     * @param {string} text
+     * @returns {HTMLDivElement}
+     * @private
+     */
+    message(className, text) {
+        const div = document.createElement('div');
+        div.className = className;
+        div.textContent = text;
+        return div;
+    }
+
+    /**
+     * Reflects the image settings of the configuration in the image controls
+     *
+     * The grayscale toggle is checked when all images are grayscale (the default) and indeterminate
+     * when front and back differ. All controls are disabled when there are no images.
+     *
+     * @param {object} setup - The parsed YAML configuration object.
+     * @private
+     */
+    updateImageControls(setup) {
+        const images = ['front', 'back']
+            .map(side => setup?.image?.[side])
+            .filter(image => image?.src);
+
+        if (this.grayscaleToggle) {
+            const grayscale = images.map(image => Boolean(image.grayscale ?? true));
+            this.grayscaleToggle.disabled = images.length === 0;
+            this.grayscaleToggle.checked = grayscale.length > 0 && grayscale.every(Boolean);
+            this.grayscaleToggle.indeterminate = grayscale.some(Boolean) && !grayscale.every(Boolean);
+        }
+
+        if (this.opacitySlider) {
+            const opacities = [...new Set(images.map(image => Math.round(Number(image.opacity ?? 0.5) * 100)))];
+            this.opacitySlider.disabled = images.length === 0;
+            this.opacitySlider.value = opacities.length ? opacities[0] : 50;
+            this.showOpacity(opacities.length ? opacities.map(o => `${o}%`).join(' / ') : '');
+        }
+    }
+
+    /**
+     * @param {string} text
+     * @private
+     */
+    showOpacity(text) {
+        if (this.opacityValue) this.opacityValue.textContent = text;
+    }
+
+    /**
+     * Sets the grayscale option of all images in the YAML
+     * @private
+     */
+    onGrayscaleToggle() {
+        if (!this.setImageOption('grayscale', this.grayscaleToggle.checked)) {
+            this.grayscaleToggle.checked = !this.grayscaleToggle.checked; // can't edit broken YAML, undo the click
+        }
+    }
+
+    /**
+     * Previews the opacity while the slider is dragged, without touching the YAML
+     * @private
+     */
+    onOpacityInput() {
+        const opacity = this.opacitySlider.value / 100;
+        this.output.querySelectorAll('svg image').forEach(image => image.setAttribute('opacity', opacity));
+        this.showOpacity(`${this.opacitySlider.value}%`);
+    }
+
+    /**
+     * Sets the opacity option of all images in the YAML once the slider is released
+     * @private
+     */
+    onOpacityChange() {
+        this.setImageOption('opacity', this.opacitySlider.value / 100);
+    }
+
+    /**
+     * Sets an option of all images in the YAML
+     *
+     * Only the affected lines are changed, so formatting, comments and undo history are kept.
+     *
+     * @param {string} option
+     * @param {boolean|number} value
+     * @returns {boolean} false if the YAML could not be edited
+     * @private
+     */
+    setImageOption(option, value) {
+        const session = this.ace.session;
+        let edits;
+        try {
+            edits = imageOptionEdits(session.getValue(), option, value);
+        } catch (e) {
+            return false;
+        }
+
+        for (const edit of edits) {
+            const start = session.doc.indexToPosition(edit.start);
+            const end = session.doc.indexToPosition(edit.end);
+            session.replace({start, end}, edit.text);
+        }
+        return true;
+    }
+
+    /**
+     * Whether clicks on the output pick image coordinates instead of downloading
+     * @returns {boolean}
+     * @private
+     */
+    isPicking() {
+        return !!this.pickToggle?.checked;
+    }
+
+    /**
+     * Converts the mouse position into pixel coordinates of the PCB photo below it.
+     *
+     * Only works for layouts using headers, where the photo is rendered in its pixel coordinates.
+     * Coordinates are rounded to about one screen pixel, so images with small units (like
+     * SVGs using millimeters) still get precise coordinates.
+     *
+     * @param {MouseEvent} e
+     * @returns {{x: number, y: number, side: string}|null}
+     * @private
+     */
+    photoCoordinates(e) {
+        const photo = e.target.closest('svg')?.querySelector('.pcb-photo');
+        const matrix = photo?.getScreenCTM();
+        if (!matrix) return null;
+
+        const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse());
+        const unitsPerScreenPixel = 1 / Math.hypot(matrix.a, matrix.b);
+        const decimals = Math.min(3, Math.max(0, Math.ceil(-Math.log10(unitsPerScreenPixel))));
+        const round = (value) => Number(value.toFixed(decimals));
+        return {
+            x: round(point.x),
+            y: round(point.y),
+            side: photo.getAttribute('data-side'),
+        };
+    }
+
+    /**
+     * Shows the photo coordinates under the mouse while picking
+     * @param {MouseEvent} e
+     * @private
+     */
+    onOutputMove(e) {
+        if (!this.isPicking() || !this.pickStatus) return;
+        const coords = this.photoCoordinates(e);
+        this.pickStatus.textContent = coords ? `${coords.side} image: [${coords.x}, ${coords.y}]` : '';
+    }
+
+    /**
+     * Inserts the clicked photo coordinates at the editor cursor while picking, downloads the SVG otherwise
+     * @param {MouseEvent} e
+     * @private
+     */
+    onOutputClick(e) {
+        if (!this.isPicking()) {
+            this.onDownloadClick(e);
+            return;
+        }
+        const coords = this.photoCoordinates(e);
+        if (!coords) return;
+        this.ace.insert(`[ ${coords.x}, ${coords.y} ]`);
+    }
+
+    /**
+     * Downloads the clicked diagram in the selected format.
      * @param {MouseEvent} e - The click event object.
      * @private
      */
@@ -176,19 +416,55 @@ export class Editor {
         const svg = e.target.closest('svg');
         if (!svg) return; // Click was not on an SVG or its child
 
-        const serializer = new XMLSerializer();
-        const source = serializer.serializeToString(svg);
-        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
+        const index = [...this.output.querySelectorAll(':scope > svg')].indexOf(svg);
+        this.download(index === 1 ? 'back' : 'front');
+    }
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pinout.svg';
-        document.body.appendChild(a);
-        a.click();
+    /**
+     * Downloads the diagrams in the selected format
+     *
+     * @param {string} which - 'front', 'back', 'separate' (both as two files) or 'combined' (both in one file)
+     * @returns {Promise<void>}
+     */
+    async download(which) {
+        const [front, back] = this.output.querySelectorAll(':scope > svg');
+        if (!front || !back) return;
 
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const format = this.downloadFormat?.value === 'png' ? 'png' : 'svg';
+        const name = slugify(this.title);
+        const files = {
+            front: [[front, `${name}-front`]],
+            back: [[back, `${name}-back`]],
+            separate: [[front, `${name}-front`], [back, `${name}-back`]],
+            combined: [[combineSvgs(front, back), name]],
+        }[which] ?? [];
+
+        this.showDownloadStatus('');
+        const missing = new Set();
+        try {
+            for (const [index, [svg, filename]] of files.entries()) {
+                if (index) await new Promise(resolve => setTimeout(resolve, 300)); // browsers may drop quick successive downloads
+                const {blob, missingImages} = await (format === 'png' ? pngFile(svg) : svgFile(svg));
+                missingImages.forEach(url => missing.add(url));
+                saveBlob(blob, `${filename}.${format}`);
+            }
+        } catch (e) {
+            console.error(e);
+            this.showDownloadStatus(`⚠️ Download failed: ${e.message}`);
+            return;
+        }
+
+        if (missing.size) {
+            this.showDownloadStatus(`⚠️ These images could not be included in the download: ${[...missing].join(', ')}`);
+        }
+    }
+
+    /**
+     * @param {string} text
+     * @private
+     */
+    showDownloadStatus(text) {
+        if (this.downloadStatus) this.downloadStatus.textContent = text;
     }
 
     /**

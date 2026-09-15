@@ -83,13 +83,46 @@ a {
         border: 1px solid #ccc;
         cursor: pointer;
     }
+
+    .image-controls, .download-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5em 2em;
+
+        label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+
+        output {
+            min-width: 4em;
+        }
+    }
+
+    #output.picking svg {
+        cursor: crosshair;
+    }
+
+    #output .error {
+        color: #cc322d;
+    }
+
+    #output .notice {
+        margin-bottom: 1em;
+        padding: 0.5em 1em;
+        border: 1px solid #e38022;
+        background: #fdf3e8;
+        overflow-wrap: anywhere;
+    }
 }
 
 /**
  * Print Styles
  */
 @media print {
-    p {
+    p, #output .notice {
         display: none;
     }
 

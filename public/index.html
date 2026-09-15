@@ -33,9 +33,50 @@
     <div class="panel panel-output">
         <div id="output"></div>
 
+        <p class="download-controls">
+            <label>
+                ⬇️ Download
+                <select id="download-sides">
+                    <option value="separate">front and back as two files</option>
+                    <option value="combined">front and back in one file</option>
+                    <option value="front">front only</option>
+                    <option value="back">back only</option>
+                </select>
+            </label>
+            <label>
+                as
+                <select id="download-format">
+                    <option value="svg">SVG</option>
+                    <option value="png">PNG (300 DPI)</option>
+                </select>
+            </label>
+            <button type="button" id="download-button">Download</button>
+            <a href="javascript:print()">🖨️ Print</a>
+        </p>
         <p>
-            ☝️ Click the images to download.
-            <a href="javascript:print()">🖨️ Click here to print them</a>.
+            ☝️ Or click an image to download just that side.
+            <span id="download-status"></span>
+        </p>
+
+        <p class="image-controls">
+            <label>
+                <input type="checkbox" id="grayscale-toggle" checked disabled>
+                🎨 Grayscale images
+            </label>
+            <label>
+                🌓 Image opacity
+                <input type="range" id="opacity-slider" min="0" max="100" step="5" value="50" disabled>
+                <output id="opacity-value"></output>
+            </label>
+        </p>
+
+        <p>
+            <label>
+                <input type="checkbox" id="pick-toggle">
+                📍 Pick coordinates: clicking a photo inserts its pixel position at the editor cursor
+                (for <code>start</code>, <code>end</code>, <code>rowStart</code> and <code>rowEnd</code> of <code>headers</code>, on the front or back photo).
+            </label>
+            <code id="pick-status"></code>
         </p>
     </div>
 </div>

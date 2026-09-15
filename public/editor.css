@@ -84,7 +84,7 @@ a {
         cursor: pointer;
     }
 
-    .image-controls {
+    .image-controls, .download-controls {
         display: flex;
         flex-wrap: wrap;
         align-items: center;

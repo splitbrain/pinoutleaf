@@ -26,7 +26,7 @@ Give it a try: **[🚀 Open Web Editor](https://splitbrain.github.io/pinoutleaf/
   * Real-time preview of the diagram as you edit the configuration.
   * Syntax highlighting for YAML.
   * Switch PCB images between grayscale and color and adjust their opacity with a slider (sets `grayscale` and `opacity` of the images in the YAML).
-  * Download generated SVG diagrams.
+  * Download the front, the back or both (as two files or combined into one) as SVG or PNG. PNGs have 300 DPI and print in real size, too.
   * Remote images are embedded into the download. Servers that block this are linked instead, the editor shows a notice when that happens.
 
 * **CLI Tool:**

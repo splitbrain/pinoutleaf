@@ -5,6 +5,7 @@ import Yaml from 'yaml';
 import {Builder} from "./Builder.js";
 import { ImageEmbed } from "./ImageEmbed.js";
 import {imageOptionEdits} from "./YamlEdit.js";
+import {combineSvgs, pngFile, saveBlob, slugify, svgFile} from "./Download.js";
 
 /**
  * Manages the Ace editor instance, handles YAML parsing,
@@ -28,6 +29,14 @@ export class Editor {
     opacitySlider;
     /** @type {HTMLElement|null} Element showing the current opacity. */
     opacityValue;
+    /** @type {HTMLSelectElement|null} Which diagrams to download: front, back, separate or combined. */
+    downloadSides;
+    /** @type {HTMLSelectElement|null} Download format: svg or png. */
+    downloadFormat;
+    /** @type {HTMLElement|null} Element showing download problems. */
+    downloadStatus;
+    /** @type {string} Title of the current diagram, used for file names. */
+    title = '';
 
     /**
      * Creates an Editor instance.
@@ -39,6 +48,10 @@ export class Editor {
      * @param {HTMLInputElement|null} [controls.grayscaleToggle] - Checkbox to switch the images between grayscale and color.
      * @param {HTMLInputElement|null} [controls.opacitySlider] - Range input (0-100) for the image opacity.
      * @param {HTMLElement|null} [controls.opacityValue] - Element to show the current opacity in.
+     * @param {HTMLSelectElement|null} [controls.downloadSides] - Select for which diagrams to download.
+     * @param {HTMLSelectElement|null} [controls.downloadFormat] - Select for the download format.
+     * @param {HTMLButtonElement|null} [controls.downloadButton] - Button to start the download.
+     * @param {HTMLElement|null} [controls.downloadStatus] - Element to show download problems in.
      */
     constructor(editor, output, {
         pickToggle = null,
@@ -46,6 +59,10 @@ export class Editor {
         grayscaleToggle = null,
         opacitySlider = null,
         opacityValue = null,
+        downloadSides = null,
+        downloadFormat = null,
+        downloadButton = null,
+        downloadStatus = null,
     } = {}) {
         this.output = output;
         this.pickToggle = pickToggle;
@@ -53,6 +70,9 @@ export class Editor {
         this.grayscaleToggle = grayscaleToggle;
         this.opacitySlider = opacitySlider;
         this.opacityValue = opacityValue;
+        this.downloadSides = downloadSides;
+        this.downloadFormat = downloadFormat;
+        this.downloadStatus = downloadStatus;
 
         this.ace = ace.edit(editor);
         this.ace.setTheme("ace/theme/github");
@@ -79,6 +99,7 @@ export class Editor {
         this.grayscaleToggle?.addEventListener('change', this.onGrayscaleToggle.bind(this));
         this.opacitySlider?.addEventListener('input', this.onOpacityInput.bind(this));
         this.opacitySlider?.addEventListener('change', this.onOpacityChange.bind(this));
+        downloadButton?.addEventListener('click', () => this.download(this.downloadSides?.value ?? 'separate'));
     }
 
     /**
@@ -207,6 +228,7 @@ export class Editor {
         builder.flip();
         const back = builder.build().render(window.document);
 
+        this.title = setup.title ?? '';
         this.output.innerHTML = '';
         embed.problems.forEach(({side, message, linked}) => {
             this.output.appendChild(this.message('notice', linked
@@ -386,7 +408,7 @@ export class Editor {
     }
 
     /**
-     * Handles click events on the output area to trigger SVG download.
+     * Downloads the clicked diagram in the selected format.
      * @param {MouseEvent} e - The click event object.
      * @private
      */
@@ -394,19 +416,55 @@ export class Editor {
         const svg = e.target.closest('svg');
         if (!svg) return; // Click was not on an SVG or its child
 
-        const serializer = new XMLSerializer();
-        const source = serializer.serializeToString(svg);
-        const blob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
+        const index = [...this.output.querySelectorAll(':scope > svg')].indexOf(svg);
+        this.download(index === 1 ? 'back' : 'front');
+    }
 
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pinout.svg';
-        document.body.appendChild(a);
-        a.click();
+    /**
+     * Downloads the diagrams in the selected format
+     *
+     * @param {string} which - 'front', 'back', 'separate' (both as two files) or 'combined' (both in one file)
+     * @returns {Promise<void>}
+     */
+    async download(which) {
+        const [front, back] = this.output.querySelectorAll(':scope > svg');
+        if (!front || !back) return;
 
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const format = this.downloadFormat?.value === 'png' ? 'png' : 'svg';
+        const name = slugify(this.title);
+        const files = {
+            front: [[front, `${name}-front`]],
+            back: [[back, `${name}-back`]],
+            separate: [[front, `${name}-front`], [back, `${name}-back`]],
+            combined: [[combineSvgs(front, back), name]],
+        }[which] ?? [];
+
+        this.showDownloadStatus('');
+        const missing = new Set();
+        try {
+            for (const [index, [svg, filename]] of files.entries()) {
+                if (index) await new Promise(resolve => setTimeout(resolve, 300)); // browsers may drop quick successive downloads
+                const {blob, missingImages} = await (format === 'png' ? pngFile(svg) : svgFile(svg));
+                missingImages.forEach(url => missing.add(url));
+                saveBlob(blob, `${filename}.${format}`);
+            }
+        } catch (e) {
+            console.error(e);
+            this.showDownloadStatus(`⚠️ Download failed: ${e.message}`);
+            return;
+        }
+
+        if (missing.size) {
+            this.showDownloadStatus(`⚠️ These images could not be included in the download: ${[...missing].join(', ')}`);
+        }
+    }
+
+    /**
+     * @param {string} text
+     * @private
+     */
+    showDownloadStatus(text) {
+        if (this.downloadStatus) this.downloadStatus.textContent = text;
     }
 
     /**

@@ -1,0 +1,62 @@
+title: "ESP32 CAM"
+
+width: 11
+height: 15
+
+image:
+  front:
+    src: "esp32cam.front.png"
+    grayscale: false
+    opacity: 1
+    top: -115
+    left: -120
+    right: -120
+    bottom: -70
+  back:
+    src: "esp32cam.back.png"
+    grayscale: false
+    opacity: 1
+    top: -109
+    left: -12
+    right: -115
+    bottom: -109
+    
+pins:
+  left:
+    -
+    - [ "5V:power" ]
+    - [ "GND:gnd" ]
+    - [ "GPIO12:gpio", "HS2 DATA2:sdmmc" ]
+    - [ "GPIO13:gpio", "HS2 DATA3:sdmmc" ]
+    - [ "GPIO15:gpio", "HS2 CMD:sdmmc" ]
+    - [ "GPIO14:gpio", "HS2 CLK:sdmmc" ]
+    - [ "GPIO2:gpio", "HS2 DATA0:sdmmc" ]
+    - [ "GPIO4:gpio", "HS2 DATA1:sdmmc", "FLASH" ]
+    -
+    -
+    -
+    -
+    -
+    -
+  right:
+    -
+    - [ "3.3V:power" ]
+    - [ "GPIO16:gpio", "UART2 RX:uart" ]
+    - [ "GPIO0:gpio", "CSI_MCLK" ]    
+    - [ "GND:gnd" ]
+    - [ "3.3/5V POWER OUT:power" ]
+    - [ "GPIO3:gpio", "UART0 RX:uart" ]    
+    - [ "GPIO1:gpio", "UART0 TX:uart" ]    
+    - [ "GND:gnd" ]
+    -
+    -
+    -
+    -
+    -
+    -
+
+types:
+  sdmmc:
+    label: 'SD MMC'
+    bgcolor: '#492eff'
+    fgcolor: '#FFFFFF'

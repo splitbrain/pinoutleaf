@@ -3,6 +3,7 @@
   "pinouts/adxl345.yaml": "ADXL345",
   "pinouts/dfplayer-mini.yaml": "DFPlayer Mini",
   "pinouts/esp32-c3-super-mini.yaml": "ESP32 C3 Super Mini",
+  "pinouts/esp32cam.yaml": "ESP32 CAM",
   "pinouts/lolin32-lite.yaml": "Lolin32 lite",
   "pinouts/m5-stamp-pico.yaml": "M5 Stamp Pico v1.0",
   "pinouts/raspberry-pi-pico.yaml": "Raspberry Pi Pico",
